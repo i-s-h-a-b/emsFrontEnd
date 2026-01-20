@@ -1,0 +1,133 @@
+
+<div class="register-wrapper">
+  <div class="card register-card">
+    <h2 class="text-center">Create Account</h2>
+    <form #form="ngForm">
+     
+      <!-- Row 1: Username & Full Names -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label>Username <span class="text-danger">*</span></label>
+          <input type="text" [(ngModel)]="registerObj.username" #consumer="ngModel"
+            name="username" required placeholder="Username">
+          @if(consumer.errors?.['required'] && consumer.touched){
+            <div class="error-msg">Username is required.</div>
+          }
+        </div>
+        
+        <div class="form-group half-width">
+          <label>First Name <span class="text-danger">*</span></label>
+          <input type="text" [(ngModel)]="registerObj.fname" #fname="ngModel"
+            name="fname" required maxlength="50" pattern="^[a-zA-Z ]+$" placeholder="First Name">
+          @if(fname.errors?.['required'] && fname.touched){
+            <div class="error-msg">First Name is required.</div>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Last Name <span class="text-danger">*</span></label>
+        <input type="text" [(ngModel)]="registerObj.lname" #lname="ngModel"
+          name="lname" required maxlength="50" pattern="^[a-zA-Z ]+$" placeholder="Last Name">
+        @if(lname.errors?.['required'] && lname.touched){
+          <div class="error-msg">Last Name is required.</div>
+        }
+      </div>
+
+      <!-- Address -->
+      <div class="form-group">
+        <label>Address <span class="text-danger">*</span></label>
+        <textarea [(ngModel)]="registerObj.address" #addr="ngModel"
+          name="address" required minlength="10" placeholder="Full Address"></textarea>
+        @if(addr.errors?.['required'] && addr.touched){
+          <div class="error-msg">Address is required.</div>
+        }
+      </div>
+
+      <!-- Contact Info -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label>Email <span class="text-danger">*</span></label>
+          <input type="email" [(ngModel)]="registerObj.email" #email="ngModel"
+            name="email" required email placeholder="Email Address">
+          @if(email.errors?.['required'] && email.touched){
+            <div class="error-msg">Email is required.</div>
+          }
+        </div>
+
+        <div class="form-group half-width">
+          <label>Mobile <span class="text-danger">*</span></label>
+          <input type="text" [(ngModel)]="registerObj.mobileNumber" #mobile="ngModel"
+            name="mobileNumber" required pattern="^[7-9][0-9]{9}$" placeholder="10-digit Mobile">
+          @if(mobile.errors?.['required'] && mobile.touched){
+            <div class="error-msg">Mobile is required.</div>
+          }
+        </div>
+      </div>
+
+      <!-- Customer Details -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label>Customer Type <span class="text-danger">*</span></label>
+          <select [(ngModel)]="registerObj.customerType" name="customerType" required>
+            <option value="">Select Type</option>
+            <option value="Residential">Residential</option>
+            <option value="Commercial">Commercial</option>
+            
+          </select>
+        </div>
+
+        <div class="form-group half-width">
+          <label>Section <span class="text-danger">*</span></label>
+          <select [(ngModel)]="registerObj.electricalSection" name="electricalSection" required>
+            <option value="">Select Section</option>
+            <option value="East_Zone">East Zone</option>
+            <option value="West_Zone">West Zone</option>
+            <option value="North_Zone">North Zone</option>
+            <option value="South_Zone">South Zone</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Consumer Number <span class="text-danger">*</span></label>
+        <input type="text" [(ngModel)]="registerObj.consumerNumber" #consumerNum="ngModel"
+          name="consumerNumber" required pattern="^[0-9]{13}$" placeholder="13-digit Consumer Number">
+        @if(consumerNum.errors?.['required'] && consumerNum.touched){
+          <div class="error-msg">Consumer Number is required.</div>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label>Password <span class="text-danger">*</span></label>
+          <input type="password" [(ngModel)]="registerObj.password" #pass="ngModel"
+            name="password" required pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,}$" placeholder="Password">
+          @if(pass.errors?.['pattern'] && pass.touched){
+            <div class="error-msg">Password too weak.</div>
+          }
+        </div>
+
+        <div class="form-group half-width">
+          <label>Confirm <span class="text-danger">*</span></label>
+          <input type="password" [(ngModel)]="registerObj.confirmPassword" #cpass="ngModel"
+            name="confirmPassword" required placeholder="Confirm">
+          @if(cpass.invalid && cpass.touched){
+             <div class="error-msg">Required.</div>
+          }
+        </div>
+      </div>
+
+      <button type="button" (click)="onRegister(form)" class="btn btn-full">Register</button>
+    </form>
+    
+    <div class="footer-link">
+      <p>Already have an account? <a routerLink="/login">Login</a></p>
+    </div>
+
+    <div *ngIf="confirmationMessage" class="alert alert-success mt-3">
+      {{ confirmationMessage }}
+    </div>
+  </div>
+</div>

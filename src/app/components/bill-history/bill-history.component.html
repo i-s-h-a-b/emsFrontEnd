@@ -1,0 +1,77 @@
+<div class="container mt-3">
+  <h2>Bill History</h2>
+
+  <!-- Filters -->
+  <div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="filter-group">
+        <label>From:</label>
+        <input type="date" [(ngModel)]="fromDate">
+      </div>
+      <div class="filter-group">
+        <label>To:</label>
+        <input type="date" [(ngModel)]="toDate">
+      </div>
+      <div class="filter-group">
+        <label>Status:</label>
+        <select [(ngModel)]="statusFilter">
+          <option>All</option>
+          <option>Paid</option>
+          <option>Unpaid</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Sort By:</label>
+        <select [(ngModel)]="sortField">
+          <option value="">None</option>
+          <option value="billDate">Bill Date</option>
+          <option value="dueDate">Due Date</option>
+          <option value="billAmount">Bill Amount</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="alert alert-warning" *ngIf="filteredBills.length === 0">
+    No billing data available for the selected range.
+  </div>
+
+  <!-- Bills Table -->
+  <div class="card" *ngIf="filteredBills.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Bill Date</th>
+          <th>Period</th>
+          <th>Due Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Payment Date</th>
+          <th>Mode</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bill of filteredBills">
+          <td>{{ bill.billDate }}</td>
+          <td>{{ bill.billingPeriod }}</td>
+          <td>{{ bill.dueDate }}</td>
+          <td>₹{{ bill.billAmount }}</td>
+          <td>
+            <span [class.badge-success]="bill.paymentStatus === 'Paid'"
+                  [class.badge-danger]="bill.paymentStatus === 'Unpaid'"
+                  class="badge">
+              {{ bill.paymentStatus }}
+            </span>
+          </td>
+          <td>{{ bill.paymentDate }}</td>
+          <td>{{ bill.paymentMode }}</td>
+          <td>
+            <a href="#" class="btn-sm btn-secondary">Download</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

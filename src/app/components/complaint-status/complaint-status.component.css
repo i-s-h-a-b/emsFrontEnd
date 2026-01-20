@@ -1,0 +1,8 @@
+
+.container { max-width: 900px; margin: 24px auto; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.actions { margin-top: 12px; }
+.card { background: #fff; border: 1px solid #ddd; padding: 12px; margin-top: 12px; }
+.list table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.list th, .list td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+.muted { color: #777; margin-top: 12px; }

@@ -1,0 +1,164 @@
+<!-- HERO SECTION -->
+<div class="body">
+<div class="hero-section text-center text-white p-5 pb-0 m-4">
+<div class="hero-overlay p-5 mb-5 rounded border-dark ">
+    <h1 class="fw-bold">
+      Welcome to City Electricity Distribution Co. Ltd.
+    </h1>
+    <p class="lead">
+      Reliable power. Simple billing. Better service.
+    </p>
+
+    <!-- SLIDING WINDOW -->
+    <div id="featureCarousel"
+     class="carousel slide mt-4"
+     data-bs-ride="carousel"
+     data-bs-interval="2500">
+
+  <div class="carousel-inner text-center">
+
+    <div class="carousel-item active">
+      💳 Pay your electricity bill online at your convenience
+    </div>
+    <div class="carousel-item">
+      📄 View & download monthly bills anytime
+    </div>
+    <div class="carousel-item">
+      ⚡ Save energy, save money, save the future
+    </div>
+    <div class="carousel-item">
+      🛠 Register complaints & track status easily
+    </div>
+  </div>
+
+  </div>
+</div>
+
+  </div>
+
+<!-- PORTAL BLOCKS -->
+<div class="container mt-5" >
+  <div class="row g-4 text-center">
+
+    <div class="col-md-4 ">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body portal">
+          <i class="bi bi-person-circle fs-1"></i>
+          <h5 class="mt-3">Customer Portal</h5>
+          <p>View bills, pay online & manage complaints.</p>
+          <button routerLink="/login" class="btn btn-outline-dark btn-sm">
+            Go to Customer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body portal">
+          <i class="bi bi-shield-lock fs-1"></i>
+          <h5 class="mt-3">Admin Portal</h5>
+          <p>Manage customers, consumers & billing.</p>
+          <button routerLink="/login" class="btn btn-outline-dark btn-sm">
+            Go to Admin
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 portal">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body portal">
+          <i class="bi bi-tools fs-1"></i>
+          <h5 class="mt-3">SME Portal</h5>
+          <p>Review data & support operations.</p>
+          <button routerLink="/login" class="btn btn-outline-dark btn-sm">
+            Go to SME
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ANNOUNCEMENTS -->
+<div class="container mt-5">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5>📢 Notifications & Announcements</h5>
+      <ul class="mb-0">
+        <li>Scheduled power maintenance on Sunday</li>
+        <li>New online payment offers available</li>
+        <li>Revised electricity tariff effective from July</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- TARIFF SECTION -->
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5>⚡ Electricity Tariff & GST</h5>
+      <p>Domestic: ₹5/unit | Commercial: ₹7/unit</p>
+      <p>GST: 18%</p>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER REVIEWS -->
+<div class="container mt-5 pb-5">
+  <h4 class="text-white text-center mb-4">⭐ Customer Reviews</h4>
+
+  <div id="reviewCarousel"
+     class="carousel slide"
+     data-bs-ride="carousel"
+     data-bs-interval="4000">
+
+  <div class="carousel-inner">
+
+    <div class="carousel-item active">
+      <div class="row g-3">
+        <div class="col-md-4" *ngFor="let r of [1,2,3]">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              ⭐⭐⭐⭐⭐
+              <p class="mt-2">Easy bill payment and good service.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="carousel-item">
+      <div class="row g-3">
+        <div class="col-md-4" *ngFor="let r of [4,5,6]">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              ⭐⭐⭐⭐
+              <p class="mt-2">Quick complaint resolution.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="carousel-item">
+      <div class="row g-3">
+        <div class="col-md-4" *ngFor="let r of [7,8,9]">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              ⭐⭐⭐⭐⭐
+              <p class="mt-2">Transparent billing system.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  </div>
+</div>
+</div>

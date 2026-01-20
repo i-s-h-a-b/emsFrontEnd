@@ -1,0 +1,109 @@
+.page {
+  max-width: 600px;
+  margin: 30px auto;
+  font-family: Arial, sans-serif;
+}
+
+
+h2 {
+  color: #003366;
+  text-align: center;
+  font-weight: bold;
+  font-size: 40px;
+}
+h3 {
+  color: green;
+  text-align: center;
+  font-weight: bold;
+  font-size: 30px;
+  margin-bottom: 30px;
+}
+
+
+.amount-card {
+  background: #e6f0ff;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+.card {
+  border: 1px solid #dbeafe;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+ 
+}
+
+
+label {
+  display: block;
+  margin-top: 10px;
+}
+
+
+input {
+  width: 100%;
+  padding: 6px;
+}
+
+
+.primary-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 19px;
+  width: 100%;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}
+
+
+.success {
+  background-color: #ecfdf5;
+  line-height: 1.5;
+  font-size: 17px;
+}
+
+
+.card-button{
+  display: flex;
+  flex-direction: row;
+}
+.card-button button{
+ 
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 19px;
+  width: 50%;
+  border-radius: 5px;
+  margin: 5px;
+  text-align: center;
+}
+
+.btn-full{
+  border: 1px solid;
+  background-color: #003366;
+  color: #fff;
+  padding: 10px;
+}
+.btn-full:hover{
+  border: 1px solid;
+  background-color: green;
+  color: #fff;
+}

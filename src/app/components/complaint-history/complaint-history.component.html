@@ -1,0 +1,66 @@
+<div class="container mt-3">
+  <h2>Complaint History</h2>
+  <p class="mb-3 text-muted">View all previously registered complaints.</p>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of complaints">
+          <td>{{ c.complaintId }}</td>
+          <td>{{ c.complaintType }}</td>
+          <td>{{ c.category }}</td>
+          <td>{{ c.submittedAt | date:'shortDate' }}</td>
+          <td>
+            <span class="badge" [class.badge-primary]="c.status === 'Pending'" [class.badge-success]="c.status === 'Resolved'">
+              {{ c.status }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm" (click)="select(c)">View</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="selected" class="card p-3 mt-3">
+    <h3>Complaint Details: <span class="text-primary">{{ selected.complaintId }}</span></h3>
+    <hr>
+    <div class="details-grid">
+      <div class="detail-item">
+        <strong>Type:</strong> {{ selected.complaintType }}
+      </div>
+      <div class="detail-item">
+        <strong>Category:</strong> {{ selected.category }}
+      </div>
+      <div class="detail-item">
+        <strong>Status:</strong> <span class="badge badge-primary">{{ selected.status }}</span>
+      </div>
+      <div class="detail-item">
+        <strong>Submitted:</strong> {{ selected.submittedAt | date:'medium' }}
+      </div>
+    </div>
+    <div class="detail-full mt-3">
+      <strong>Description:</strong>
+      <p class="p-2 bg-light rounded">{{ selected.description }}</p>
+    </div>
+    
+    <div class="detail-full mt-2" *ngIf="selected.contactEmail || selected.contactPhone">
+      <strong>Contact Info:</strong>
+      <span *ngIf="selected.contactEmail" class="mr-3">📧 {{ selected.contactEmail }}</span>
+      <span *ngIf="selected.contactPhone">📞 {{ selected.contactPhone }}</span>
+    </div>
+
+    <button class="btn btn-secondary mt-3" (click)="selected = null">Close Details</button>
+  </div>
+</div>

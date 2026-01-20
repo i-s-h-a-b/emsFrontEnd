@@ -1,0 +1,41 @@
+<div class="login-wrapper">
+  <div class="card login-card">
+      <h2 class="text-center">Login</h2>
+      <form #form="ngForm">
+          <div class="form-group">
+            <label for="username">Username <span class="text-danger">*</span></label>
+            <input type="text" [(ngModel)]="loginObj.username" #uname="ngModel" id="username" name="username" placeholder="ex. Example123" required>
+            @if(uname.errors?.['required'] && uname.touched){
+              <div class="error-msg">Username is required</div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password <span class="text-danger">*</span></label>
+            <input type="password" [(ngModel)]="loginObj.password" #pass="ngModel" id="password"
+            minlength="8" pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,20}$"
+            name="password" placeholder="ex. Password@1234" required>
+
+            @if(pass.errors?.['required'] && pass.touched){
+              <div class="error-msg">Password is required</div>
+            }
+            @if(pass.errors?.['minlength'] && pass.touched){
+              <div class="error-msg">Minimum 8 characters required.</div>
+            }
+            @if(pass.errors?.['pattern'] && pass.touched){
+              <div class="error-msg">Password must be complex (Upper, Lower, Digit, Special)</div>
+            }
+          </div>
+
+          <button type="button" [disabled]="form.invalid" (click)="onLogin()" class="btn btn-full">Login</button>
+      </form>
+
+      <div class="login-footer">
+        <p>Not registered? <a routerLink="/register">Create an account</a></p>
+      </div>
+
+      <div *ngIf="errorMessage !== ''" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+  </div>
+</div>

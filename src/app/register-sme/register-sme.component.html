@@ -1,0 +1,81 @@
+<div class="body">
+  <div class="register-container">
+    <h2>SME Registration</h2>
+    <form #form="ngForm">
+      
+      <!-- Full Name -->
+      <label for="fullName">Full Name<span class="error">*</span></label>
+      <input type="text" [(ngModel)]="registerObj.fullName" #fname="ngModel"
+        id="fullName" name="fullName" required maxlength="50" pattern="^[a-zA-Z ]+$"
+        placeholder="Enter Full Name">
+      @if(fname.errors?.['required'] && fname.touched){
+        <span class="error">Full Name is required.</span>
+      }
+      @if(fname.errors?.['pattern']){
+        <span class="error">Name should contain only letters.</span>
+      }
+
+      <!-- Email -->
+      <label for="email">Email<span class="error">*</span></label>
+      <input type="email" [(ngModel)]="registerObj.email" #email="ngModel"
+        id="email" name="email" required email placeholder="Enter Email">
+      @if(email.errors?.['required'] && email.touched){
+        <span class="error">Email is required.</span>
+      }
+      @if(email.errors?.['email']){
+        <span class="error">Incorrect email format.</span>
+      }
+
+      <!-- Mobile Number -->
+      <label for="mobileNumber">Mobile Number<span class="error">*</span></label>
+      <input type="text" [(ngModel)]="registerObj.mobileNumber" #mobile="ngModel"
+        id="mobileNumber" name="mobileNumber" required pattern="^[0-9]{10}$"
+        placeholder="Enter 10-digit Mobile Number">
+      @if(mobile.errors?.['required'] && mobile.touched){
+        <span class="error">Mobile number is required.</span>
+      }
+      @if(mobile.errors?.['pattern']){
+        <span class="error">Mobile number is invalid.</span>
+      }
+
+      <!-- User ID -->
+      <label for="userId">User ID<span class="error">*</span></label>
+      <input type="text" [(ngModel)]="registerObj.userId" #uid="ngModel"
+        id="userId" name="userId" required minlength="5" maxlength="20"
+        placeholder="Enter User ID">
+      @if(uid.errors?.['required'] && uid.touched){
+        <span class="error">User ID is required.</span>
+      }
+      @if(uid.errors?.['minlength']){
+        <span class="error">User ID must be at least 5 characters.</span>
+      }
+
+      <!-- Password -->
+      <label for="password">Password<span class="error">*</span></label>
+      <input type="password" [(ngModel)]="registerObj.password" #pass="ngModel"
+        id="password" name="password" required
+        pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,}$"
+        placeholder="Enter Password">
+      @if(pass.errors?.['required'] && pass.touched){
+        <span class="error">Password is required.</span>
+      }
+      @if(pass.errors?.['pattern']){
+        <span class="error">Password must contain uppercase, lowercase, digit & special character.</span>
+      }
+
+      <!-- Confirm Password -->
+      <label for="confirmPassword">Confirm Password<span class="error">*</span></label>
+      <input type="password" [(ngModel)]="registerObj.confirmPassword" #cpass="ngModel"
+        id="confirmPassword" name="confirmPassword" required placeholder="Confirm Password">
+      @if(cpass.errors?.['required'] && cpass.touched){
+        <span class="error">Confirm Password is required.</span>
+      }
+
+      <button type="button" (click)="onRegister(form)">Register</button>
+    </form>
+
+    <div *ngIf="confirmationMessage" class="success-message">
+      {{ confirmationMessage }}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,56 @@
+
+<div class="page">
+  <h2>Bill Summary</h2>
+
+  <!-- Error State -->
+  <div *ngIf="selectedBills.length === 0" class="error">
+    No bills selected. Please go back and select at least one bill.
+  </div>
+
+  <!-- Bill Cards -->
+  <div
+    class="bill-card"
+    *ngFor="let bill of selectedBills">
+
+    <div class="card-header">
+      <input type="checkbox" [(ngModel)]="bill.selected">
+      <span><b>Consumer Number:</b> {{ bill.consumerNo }}</span>
+    </div>
+
+    <div class="card-body">
+      <div><b>Bill Date:</b> {{ bill.billDate }}</div>
+      <div><b>Billing Period:</b> {{ bill.billPeriod }}</div>
+      <div><b>Bill Amount:</b> ₹{{ bill.dueAmount }}</div>
+      <div><b>Due Date:</b> {{ bill.dueDate }}</div>
+    </div>
+  </div>
+
+  <!-- Total -->
+  <div class="summary">
+    <p><b>Total Amount:</b> ₹{{ totalAmount }}</p>
+  </div>
+
+  <!-- Payment Options -->
+  <div class="card">
+    <h3>Select Payment Method</h3>
+    <label>
+      <input type="radio" name="payment" [(ngModel)]="paymentMethod" value="card">
+      Credit Card
+    </label><br>
+    <label>
+      <input type="radio" name="payment" [(ngModel)]="paymentMethod" value="netbanking">
+       Debit Card
+    </label>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button (click)="goBack()">Back</button>
+    <button
+      class="primary-btn"
+      [disabled]="selectedBills.length === 0"
+      (click)="proceedToPayment()">
+      Proceed to Payment
+    </button>
+  </div>
+</div>

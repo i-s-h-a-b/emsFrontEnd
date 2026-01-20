@@ -1,0 +1,144 @@
+<header class="app-header">
+  <h1>{{ title }}</h1>
+</header>
+<div class="container">
+  <h2>SME Complaint Management</h2>
+
+  <!-- ===================== Search Section ===================== -->
+  <section class="search">
+    <div class="field">
+      <label>Customer ID / Consumer No</label>
+      <input
+        type="text"
+        [ngModel]="search().customerId"
+        (ngModelChange)="setSearch('customerId', $event)"
+        placeholder="e.g., CU001" />
+    </div>
+
+    <div class="field">
+      <label>Complaint ID</label>
+      <input
+        type="text"
+        [ngModel]="search().complaintId"
+        (ngModelChange)="setSearch('complaintId', $event)"
+        placeholder="e.g., C101" />
+    </div>
+
+    <div class="field">
+      <label>Complaint Type</label>
+      <select
+        [ngModel]="search().complaintType"
+        (ngModelChange)="setSearch('complaintType', $event)">
+        <option value="">Any</option>
+        <option *ngFor="let t of complaintTypes" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Date From</label>
+      <input
+        type="date"
+        [ngModel]="search().dateFrom"
+        (ngModelChange)="setSearch('dateFrom', $event)" />
+    </div>
+
+    <div class="field">
+      <label>Date To</label>
+      <input
+        type="date"
+        [ngModel]="search().dateTo"
+        (ngModelChange)="setSearch('dateTo', $event)" />
+    </div>
+
+    <div class="actions">
+      <!-- Computed list updates automatically when search signal changes -->
+      <button class="btn btn-primary" (click)="null">Search</button>
+      <button class="btn btn-secondary" (click)="clearSearch()">Clear</button>
+    </div>
+  </section>
+
+  <!-- ===================== Export Buttons ===================== -->
+  <section class="export">
+    <button class="btn btn-primary" (click)="exportCSV()">Export CSV</button>
+    <button class="btn btn-warn" (click)="exportPDF()">Export PDF</button>
+  </section>
+
+  <!-- ===================== Complaints Table ===================== -->
+  <section class="table-wrapper">
+    <table class="table">
+        <!-- Table header -->
+        <thead>
+        <tr>
+        <th>Complaint ID</th>
+        <th>Customer ID / Consumer No</th>
+        <th>Complaint Type</th>
+        <th>Date Submitted</th>
+        <th>Status</th>
+        <th>Last Updated</th>
+        <th>Notes</th> <!-- ✅ New column -->
+        <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <!-- Display rows -->
+        <tr *ngFor="let c of filteredComplaints()">
+        <td>{{ c.complaintId }}</td>
+        <td>{{ c.customerId }}</td>
+        <td>{{ c.complaintType }}</td>
+        <td>{{ c.dateSubmitted }}</td>
+        <td><span [class]="statusClass(c.status)">{{ c.status }}</span></td>
+        <td>{{ c.lastUpdated }}</td>
+
+        <!-- ✅ Notes column with truncation and tooltip -->
+        <td>
+        <span class="note-preview" [title]="c.notes || ''">
+        {{ (c.notes || '') | slice:0:60 }}<ng-container *ngIf="(c.notes || '').length > 60">…</ng-container>
+        </span>
+        </td>
+
+        <td>
+        <button class="btn btn-link" (click)="startEdit(c)" *ngIf="editingId() !== c.complaintId">Update</button>
+        </td>
+        </tr>
+
+        <!-- Inline edit panel row (unchanged) -->
+        <tr *ngFor="let c of filteredComplaints()" [hidden]="editingId() !== c.complaintId">
+        <td colspan="8"> <!-- ✅ colspan increased to include Notes + Actions -->
+        <div class="edit-panel">
+        <div class="field">
+        <label>Status</label>
+        <select [ngModel]="editStatus()" (ngModelChange)="editStatus.set($event)">
+        <option>Open</option>
+        <option>In Progress</option>
+        <option>Resolved</option>
+        </select>
+        </div>
+
+        <div class="field grow">
+        <label>Notes</label>
+        <textarea
+        rows="2"
+        [ngModel]="editNotes()"
+        (ngModelChange)="editNotes.set($event)"
+        placeholder="Add notes"></textarea>
+        </div>
+
+        <div class="actions">
+        <button class="btn btn-primary" (click)="saveEdit()">Save</button>
+        <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+        </div>
+        </div>
+        </td>
+        </tr>
+        </tbody>
+    </table>
+
+    
+
+    <!-- Empty state -->
+    <div class="empty" *ngIf="filteredComplaints().length === 0">
+      No complaints found for the given criteria.
+    </div>
+  </section>
+</div>

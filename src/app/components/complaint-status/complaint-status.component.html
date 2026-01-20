@@ -1,0 +1,65 @@
+<div class="container mt-3">
+  <h2>Complaint Status</h2>
+  <div class="card p-3 mb-3">
+    <div class="row align-items-end">
+      <div class="col-half">
+        <label>Search by ID</label>
+        <input type="text" [(ngModel)]="searchId" placeholder="e.g. CMP-..." class="mb-0">
+      </div>
+      <div class="col-half">
+        <label>Or Status</label>
+        <select [(ngModel)]="searchStatus" class="mb-0">
+          <option value="">-- Select Status --</option>
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button class="btn" (click)="search()">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result By ID -->
+  <div *ngIf="resultById" class="card p-3">
+    <h3>Result for: <span class="text-primary">{{ resultById.complaintId }}</span></h3>
+    <div class="details-grid">
+      <p><strong>Submitted:</strong> {{ resultById.submittedAt | date:'medium' }}</p>
+      <p><strong>Status:</strong> <span class="badge badge-primary">{{ resultById.status }}</span></p>
+      <p><strong>Type:</strong> {{ resultById.complaintType }}</p>
+      <p><strong>Category:</strong> {{ resultById.category }}</p>
+    </div>
+    <div class="bg-light p-2 rounded mt-2">
+      <strong>Description:</strong> {{ resultById.description }}
+    </div>
+  </div>
+
+  <!-- Result List -->
+  <div *ngIf="!resultById && resultByStatus.length" class="card">
+    <h3>Results ({{ resultByStatus.length }})</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Complaint ID</th>
+          <th>Submitted</th>
+          <th>Type</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of resultByStatus">
+          <td>{{ c.complaintId }}</td>
+          <td>{{ c.submittedAt | date:'short' }}</td>
+          <td>{{ c.complaintType }}</td>
+          <td>
+            <span class="badge badge-primary">{{ c.status }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!resultById && !resultByStatus.length" class="alert alert-info mt-3">
+    No results found. Try a different ID or status.
+  </div>
+</div>
+``

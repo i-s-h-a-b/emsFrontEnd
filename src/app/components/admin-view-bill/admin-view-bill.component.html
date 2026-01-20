@@ -1,0 +1,87 @@
+
+<div class="page">
+  <h2>View Bill – Admin</h2>
+
+  <!-- Search -->
+  <div class="card">
+    <label>Consumer Number</label>
+    <input [(ngModel)]="consumerNo">
+    <button (click)="search()">Search</button>
+  </div>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+
+  <!-- Filters -->
+  <!-- Filters -->
+<div class="card" *ngIf="bills.length">
+
+  <label>Payment Status</label>
+  <select [(ngModel)]="paymentStatusFilter">
+    <option value="All">All</option>
+    <option value="Paid">Paid</option>
+    <option value="Unpaid">Unpaid</option>
+  </select>
+
+  <label>Billing Period</label>
+  <select [(ngModel)]="periodFilter">
+    <option value="All">All</option>
+    <option value="Last6">Last 6 Months</option>
+    <option value="Year">Specific Year</option>
+  </select>
+
+  <!-- Year Input -->
+  <input
+    *ngIf="periodFilter === 'Year'"
+    placeholder="Enter year (e.g. 2025)"
+    [(ngModel)]="selectedYear"
+  />
+
+  <button>Export CSV</button>
+</div>
+
+
+  <!-- Table -->
+  <table *ngIf="filteredBills.length">
+    <thead>
+      <tr>
+        <th>Bill ID</th>
+        <th>Billing Period</th>
+        <th>Bill Date</th>
+        <th>Due Date</th>
+        <th>Bill Amount</th>
+        <th>Late Fee</th>
+        <th>Status</th>
+        <th>Payment Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let bill of filteredBills">
+        <td>{{ bill.billId }}</td>
+        <td>{{ bill.billingPeriod }}</td>
+        <td>{{ bill.billDate }}</td>
+        <td>{{ bill.dueDate }}</td>
+        <td>₹{{ bill.billAmount }}</td>
+        <td>₹{{ bill.lateFee }}</td>
+        <td>{{ bill.paymentStatus }}</td>
+        <td>{{ bill.paymentDate }}</td>
+        <td>
+          <a href="#" (click)="viewDetails(bill)">View Details</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Detailed View -->
+  <div class="card" *ngIf="selectedBill">
+    <h3>Bill Details</h3>
+    <p><b>Bill ID:</b> {{ selectedBill.billId }}</p>
+    <p><b>Consumer:</b> {{ selectedBill.consumerNo }}</p>
+    <p><b>Billing Period:</b> {{ selectedBill.billingPeriod }}</p>
+    <p><b>Bill Amount:</b> ₹{{ selectedBill.billAmount }}</p>
+    <p><b>Late Fee:</b> ₹{{ selectedBill.lateFee }}</p>
+    <p><b>Status:</b> {{ selectedBill.paymentStatus }}</p>
+    <p><b>Payment Date:</b> {{ selectedBill.paymentDate }}</p>
+  </div>
+</div>

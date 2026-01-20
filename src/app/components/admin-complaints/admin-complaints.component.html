@@ -1,0 +1,92 @@
+<div class="container mt-3">
+  <h2>Admin - Complaints</h2>
+
+  <!-- Search -->
+  <form [formGroup]="searchForm" (ngSubmit)="search()" class="card p-3 mb-3">
+    <h5>Search Filters</h5>
+    <div class="row">
+      <div class="col-four">
+        <label>Customer ID</label>
+        <input formControlName="customerId" placeholder="CUST123">
+      </div>
+      <div class="col-four">
+        <label>Consumer No</label>
+        <input formControlName="consumerNumber" placeholder="CN-0001">
+      </div>
+      <div class="col-four">
+        <label>Complaint ID</label>
+        <input formControlName="complaintId" placeholder="CMP-...">
+      </div>
+      <div class="col-four">
+        <label>Complaint Type</label>
+        <input formControlName="complaintType" placeholder="Billing Issue...">
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-half">
+        <label>Start Date</label>
+        <input type="date" formControlName="startDate">
+      </div>
+      <div class="col-half">
+        <label>End Date</label>
+        <input type="date" formControlName="endDate">
+      </div>
+    </div>
+
+    <div class="actions mt-3">
+      <button type="submit" class="btn">Search</button>
+      <button type="button" class="btn btn-secondary" (click)="complaints.set([]); errorMessage.set(''); searchForm.reset()">Clear</button>
+    </div>
+  </form>
+
+  <p class="alert alert-danger" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+
+  <!-- Results & Export -->
+  <div class="card p-3" *ngIf="complaints().length">
+    <div class="d-flex justify-content-between mb-3">
+      <h4>Results ({{ complaints().length }})</h4>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-secondary" (click)="exportCSV()">Export CSV</button>
+        <button class="btn btn-sm btn-secondary" (click)="exportPDF()">Export PDF</button>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Consumer</th>
+          <th>Type</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of complaints()">
+          <td>{{ c.complaintId }}</td>
+          <td>
+            <div class="small">{{ c.customerId || '-' }}</div>
+            <div class="small text-muted">{{ c.consumerNumber || '-' }}</div>
+          </td>
+          <td>{{ c.complaintType }}</td>
+          <td>{{ c.submittedAt | date:'shortDate' }}</td>
+          <td>
+            <span class="badge" [class.badge-primary]="editing[c.complaintId].status === 'Open'" [class.badge-success]="editing[c.complaintId].status === 'Resolved'">
+              {{ editing[c.complaintId].status || 'Open' }}
+            </span>
+          </td>
+          <td>
+            <div class="d-flex gap-2">
+              <button class="btn btn-secondary btn-sm" (click)="openSummary(c)">View</button>
+              <button class="btn btn-sm" (click)="updateStatus(c)">Edit</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p *ngIf="!complaints().length && !errorMessage()" class="alert alert-info mt-3">No results found. Use filters above.</p>
+</div>

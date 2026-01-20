@@ -1,0 +1,193 @@
+
+<!-- Header / Navbar -->
+
+<!-- <header class="bg-primary text-white py-3 mb-4 shadow-sm">
+  <div class="container text-center">
+    <h1 class="h3 mb-0">Electricity Management System – Complaints</h1>
+  </div>
+</header> -->
+
+<!-- Block with Buttons -->
+<section class="container mb-4" style="margin-top: 20px;">
+  <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+    <a routerLink="/complaints/new" class="btn btn-primary btn-lg fw-semibold">
+      <i class="bi bi-pencil-square me-1"></i> New Complaint
+    </a>
+    <a routerLink="/complaints/status" class="btn btn-primary btn-lg fw-semibold">
+      <i class="bi bi-search me-1"></i> Complaint Status
+    </a>
+    <a routerLink="/complaints/history" class="btn btn-primary btn-lg fw-semibold">
+      <i class="bi bi-clock-history me-1"></i> Complaint History
+    </a>
+  </div>
+</section>
+
+
+<main class="container mb-5">
+  <!-- Hero / Intro -->
+  <section class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="p-4 rounded-3 bg-light border">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h2 class="h4">Welcome to the Complaint Portal</h2>
+            <p class="mb-2 text-secondary">
+              Register new complaints, check live status updates, and review your history. 
+              Our support team aims to resolve issues quickly and transparently.
+            </p>
+            <ul class="list-unstyled small text-secondary mb-0">
+              <li>• Power outage, meter issues, billing queries, and more</li>
+              <li>• Track progress step-by-step</li>
+              <li>• Average resolution time: 24–48 hours</li>
+            </ul>
+          </div>
+          <div class="col-md-4 text-center">
+            <img
+              src="assets/electricity.jpg"/>
+    </div>
+
+  <!-- Quick Actions (Cards) -->
+  <section class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-pencil-square me-1"></i> New Complaint</h5>
+          <p class="card-text text-secondary">
+            Report outages, meter faults, billing discrepancies, or safety hazards. Provide details and upload evidence if needed.
+          </p>
+          <a routerLink="/complaints/new" class="btn btn-primary w-100">File a Complaint</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-activity me-1"></i> Check Status</h5>
+          <p class="card-text text-secondary">
+            Track the progress of your complaint in real-time and see the assigned team and ETA.
+          </p>
+          <a routerLink="/complaints/status" class="btn btn-success w-100">View Status</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title"><i class="bi bi-clock-history me-1"></i> History</h5>
+          <p class="card-text text-secondary">
+            Review past complaints, resolutions, and feedback provided by the service team.
+          </p>
+          <a routerLink="/complaints/history" class="btn btn-primary w-100">See History</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Status Summary / Announcements -->
+  <section class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">Service Updates</h5>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-info d-flex align-items-start" role="alert">
+            <i class="bi bi-info-circle me-2 fs-5"></i>
+            <div>
+              Planned maintenance in your area on <strong>Fri, Jan 9</strong> from 10:00–13:00. You may experience brief outages.
+            </div>
+          </div>
+          <div class="alert alert-warning d-flex align-items-start" role="alert">
+            <i class="bi bi-exclamation-triangle me-2 fs-5"></i>
+            <div>
+              High load due to weather conditions. Our crews are on priority duty to address outages quickly.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Small Stats -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">Today’s Stats</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-secondary">Active complaints</span>
+            <span class="fw-semibold">27</span>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-secondary">Resolved today</span>
+            <span class="fw-semibold text-success">19</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-secondary">Avg. resolution time</span>
+            <span class="fw-semibold">36h</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion -->
+  <section class="row g-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0">Frequently Asked Questions</h5>
+        </div>
+        <div class="card-body">
+          <div class="accordion" id="complaintFaq">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faq1">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1c" aria-expanded="true" aria-controls="faq1c">
+                  What details should I include in a new complaint?
+                </button>
+              </h2>
+              <div id="faq1c" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#complaintFaq">
+                <div class="accordion-body">
+                  Provide your service ID, location, issue type (outage, meter, billing), time of occurrence, and any photos/videos.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faq2">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2c" aria-expanded="false" aria-controls="faq2c">
+                  How do I track the status of my complaint?
+                </button>
+              </h2>
+              <div id="faq2c" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#complaintFaq">
+                <div class="accordion-body">
+                  Use the <em>Complaint Status</em> page and enter your complaint ID or view the list linked to your account.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faq3">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3c" aria-expanded="false" aria-controls="faq3c">
+                  How long does it take to resolve a complaint?
+                </button>
+              </h2>
+              <div id="faq3c" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#complaintFaq">
+                <div class="accordion-body">
+                  Most cases resolve within 24–48 hours. Complex technical issues may take longer; we’ll keep you updated.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Named outlet for child views -->
+  <section class="mt-4">
+    <router-outlet name="customerComplain"></router-outlet>
+  </section>

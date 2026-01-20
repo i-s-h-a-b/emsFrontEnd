@@ -1,0 +1,38 @@
+.page {
+  max-width: 1000px;
+  margin: 30px auto;
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  color: #003366;
+}
+
+.card {
+  border: 1px solid #dbeafe;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  background-color: #e6f0ff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  border: 1px solid #dbeafe;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #e6f0ff;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}

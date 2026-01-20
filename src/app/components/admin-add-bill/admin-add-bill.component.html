@@ -1,0 +1,56 @@
+<div class="page">
+  <h2>Add Bill (Admin)</h2>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+  <div class="success" *ngIf="message">{{ message }}</div>
+
+  <form [formGroup]="billForm" class="card">
+
+    <label>Consumer No</label>
+    <input formControlName="consumerNo">
+
+    <label>Billing Period</label>
+    <input placeholder="e.g. June 2024" formControlName="billingPeriod">
+
+    <label>Bill Date</label>
+    <input type="date" formControlName="billDate">
+
+    <label>Due Date</label>
+    <input type="date" formControlName="dueDate">
+
+    <label>Disconnection Date</label>
+    <input type="date" formControlName="disconnectionDate">
+
+    <label>Bill Amount</label>
+    <input type="number" formControlName="billAmount">
+
+    <label>Late Fee (Optional)</label>
+    <input type="number" formControlName="lateFee">
+
+    <label>Status</label>
+    <select formControlName="status">
+      <option>Unpaid</option>
+      <option>Paid</option>
+    </select>
+
+    <button type="button" class="primary-btn" (click)="saveBill()">
+      Save Bill
+    </button>
+
+    <button type="button">Bulk Upload Bills</button>
+    <button type="button">Back to Dashboard</button>
+
+  </form>
+
+  <!-- Confirmation -->
+  <div class="card" *ngIf="savedBill">
+    <h3>Bill Added</h3>
+    <p><b>Bill ID:</b> {{ savedBill.billId }}</p>
+    <p><b>Consumer No:</b> {{ savedBill.consumerNo }}</p>
+    <p><b>Billing Period:</b> {{ savedBill.billingPeriod }}</p>
+    <p><b>Amount:</b> ₹{{ savedBill.billAmount }}</p>
+
+    <button>Add Another Bill</button>
+    <button>Return to Dashboard</button>
+  </div>
+</div>

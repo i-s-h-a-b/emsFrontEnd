@@ -1,0 +1,5 @@
+
+.container { max-width: 900px; margin: 24px auto; }
+.card { background: #fff; border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.actions { display: flex; gap: 12px; margin-top: 10px; }

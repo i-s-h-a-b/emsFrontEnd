@@ -1,0 +1,55 @@
+<div class="container mt-3">
+
+  <!-- Welcome Section -->
+  <div class="card p-3 mb-3">
+    <h3>Welcome, {{ adminName }} 👋</h3>
+    <p class="mb-0 text-muted">Manage consumers, bills, and complaints efficiently.</p>
+  </div>
+
+  <!-- Grid Section -->
+  <div class="grid-2">
+
+    <!-- CUSTOMER -->
+    <div class="card p-3">
+      <h5>Customer</h5>
+      <p class="mb-3 text-muted small">Manage customer records and details.</p>
+      <div class="actions">
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/register">Add Customer</button>
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/list-customer">List Customers</button>
+      </div>
+    </div>
+
+    <!-- BILLS -->
+    <div class="card p-3">
+      <h5>Bills</h5>
+      <p class="mb-3 text-muted small">Generate and view electricity bills.</p>
+      <div class="actions">
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/add-bill">Add Bill</button>
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/view-bills">View Bills</button>
+      </div>
+    </div>
+
+    <!-- CONSUMER -->
+    <div class="card p-3">
+      <h5>Consumer</h5>
+      <p class="mb-3 text-muted small">Manage connections and status.</p>
+      <div class="action-grid">
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/add-consumer">Add Consumer</button>
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/list-consumer">List Consumers</button>
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/update-consumer">Update</button>
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/connect-status">Status</button>
+      </div>
+    </div>
+
+    <!-- COMPLAINTS -->
+    <div class="card p-3">
+      <h5>Complaints</h5>
+      <p class="mb-3 text-muted small">View and update customer complaints.</p>
+      <div class="actions">
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/complaints">View All</button>
+        <button class="btn btn-secondary btn-sm" routerLink="/admin/complaints/summary">Summary</button>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,44 @@
+<div class="container mt-3" *ngIf="complaint() as c">
+  <h2>Complaint Summary (Admin)</h2>
+
+  <div class="card p-3 mb-3">
+    <h3>Details</h3>
+    <div class="details-grid">
+      <p><strong>Complaint ID:</strong> <span class="text-primary">{{ c.complaintId }}</span></p>
+      <p><strong>Status:</strong> <span class="badge badge-primary">{{ c.status }}</span></p>
+      <p><strong>Customer ID:</strong> {{ c.customerId || '-' }}</p>
+      <p><strong>Consumer No:</strong> {{ c.consumerNumber || '-' }}</p>
+      <p><strong>Type:</strong> {{ c.complaintType }} - {{ c.category }}</p>
+      <p><strong>Date:</strong> {{ c.submittedAt | date:'medium' }}</p>
+      <p><strong>Last Updated:</strong> {{ c.lastUpdatedAt ? (c.lastUpdatedAt | date:'medium') : '-' }}</p>
+    </div>
+    <div class="mt-2 p-2 bg-light rounded">
+      <strong>Description:</strong> {{ c.description }}
+    </div>
+    <div class="mt-2" *ngIf="c.contactEmail || c.contactPhone">
+      <strong>Contact:</strong> 
+      <span *ngIf="c.contactEmail" class="mr-3">📧 {{ c.contactEmail }}</span>
+      <span *ngIf="c.contactPhone">📞 {{ c.contactPhone }}</span>
+    </div>
+  </div>
+
+  <div class="card p-3">
+    <h3>Update Status</h3>
+    <div class="row">
+      <div class="col-half">
+        <label>New Status</label>
+        <select [(ngModel)]="newStatus">
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+      <div class="col-half">
+        <label>Admin Notes</label>
+        <textarea [(ngModel)]="notes" rows="2" placeholder="Add internal notes..."></textarea>
+      </div>
+    </div>
+    <div class="actions mt-3">
+      <button class="btn" (click)="update()">Update Ticket</button>
+      <button class="btn btn-secondary" routerLink="/admin/complaints">Back to List</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,67 @@
+.page {
+  max-width: 900px;
+  margin: 30px auto;
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  color: #003366;
+  margin-bottom: 20px;
+}
+
+/* Bill card */
+.bill-card {
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+
+/* Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #e6f0ff;
+  padding: 10px;
+  border-bottom: 1px solid #dbeafe;
+}
+
+.status {
+  color: #f60000;
+  font-weight: bold;
+}
+
+/* Body */
+.card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 15px;
+  font-size: 14px;
+}
+
+/* Payable field */
+.payable {
+  grid-column: span 2;
+}
+
+.payable input {
+  width: 120px;
+  margin-left: 10px;
+}
+
+/* Summary */
+.summary {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.primary-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}

@@ -1,0 +1,61 @@
+
+<div class="container mt-3">
+  <h2>View Bills</h2>
+
+  <div class="card p-3" *ngIf="billsService.bills.length > 0; else noBills">
+    <table>
+      <thead>
+        <tr>
+          <th>Bill No</th>
+          <th>Consumer No</th>
+          <th>Period</th>
+          <th>Due Date</th>
+          <th>Status</th>
+          <th>Payable</th>
+          <th><!-- Action --></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let bill of billsService.bills">
+          <td>{{ bill.billNumber }}</td>
+          <td>{{ bill.consumerNo }}</td>
+          <td>{{ bill.billPeriod }}</td>
+          <td>{{ bill.dueDate }}</td>
+          @if (bill.paymentStatus==='Paid') {
+            <td style="color: rgb(11, 207, 11);">
+            <!-- <span -->
+              <!-- [class.badge-success]="bill.paymentStatus === 'Paid'"
+              [class.badge-danger]="bill.paymentStatus !== 'Paid'"
+              class="badge"> -->
+              {{ bill.paymentStatus }}
+            <!-- </span> -->
+          </td>
+          } @else{
+          <td style="color: red;">
+            <!-- <span -->
+              <!-- [class.badge-success]="bill.paymentStatus === 'Paid'"
+              [class.badge-danger]="bill.paymentStatus !== 'Paid'"
+              class="badge"> -->
+              {{ bill.paymentStatus }}
+            <!-- </span> -->
+          </td>
+        }
+          <td>₹{{ bill.dueAmount }}</td>
+          <td>
+            <button
+              class="btn btn-primary"
+              (click)="payBill(bill)"
+              [disabled]="bill.paymentStatus === 'Paid'">
+              Pay Now
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noBills>
+    <div class="alert alert-info">No unpaid bills found.</div>
+  </ng-template>
+</div>

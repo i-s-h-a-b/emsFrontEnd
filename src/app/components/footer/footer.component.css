@@ -1,0 +1,23 @@
+.app-footer {
+  background-color: #1F4287;
+  margin-top: auto;
+}
+
+.social-icons i {
+  font-size: 1.2rem;
+  margin: 0 10px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.social-icons i:hover {
+  color: var(--secondary);
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.opacity-75 {
+  opacity: 0.75;
+}

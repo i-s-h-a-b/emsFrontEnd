@@ -1,0 +1,28 @@
+
+.body {
+  /* background-image: url('../../assets/electricity-bg.png'); */
+  background-size: cover;
+  background-repeat: no-repeat;
+  /* background-attachment: fixed; */
+  background-position: center;
+}
+
+/* Transparent content blocks */
+.card {
+  background-color: rgba(60, 60, 60, 0.75) !important;
+  border-radius: 8px;
+  border-color: #aaa;
+  color: #fff;
+}
+
+.btn {
+  border-radius: 8px;
+  border-color: #aaa;
+  color: #fff;
+}
+/* Welcome / header blocks */
+.bg-light {
+  background-color: rgba(60, 60, 60, 0.75) !important;
+  border-color: #aaa;
+  color: #fff;  
+}
