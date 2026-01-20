@@ -1,65 +1,213 @@
 <div class="container mt-3">
   <h2>Complaint Status</h2>
-  <div class="card p-3 mb-3">
-    <div class="row align-items-end">
-      <div class="col-half">
-        <label>Search by ID</label>
-        <input type="text" [(ngModel)]="searchId" placeholder="e.g. CMP-..." class="mb-0">
+
+  <div *ngIf="errorMessage()" class="alert alert-danger">
+    {{ errorMessage() }}
+  </div>
+
+  <!-- Filters -->
+  <div class="card p-3 mb-3 shadow-sm">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Search by ID</label>
+        <input type="number" [(ngModel)]="searchId" placeholder="e.g. 101" class="form-control">
       </div>
-      <div class="col-half">
-        <label>Or Status</label>
-        <select [(ngModel)]="searchStatus" class="mb-0">
-          <option value="">-- Select Status --</option>
+      <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select [(ngModel)]="searchStatus" class="form-select">
+          <option value="">All Statuses</option>
           <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
         </select>
       </div>
-      <div class="col-auto">
-        <button class="btn" (click)="search()">Search</button>
+      <div class="col-md-3">
+        <label class="form-label">Type</label>
+        <select [(ngModel)]="searchType" class="form-select">
+          <option value="">All Types</option>
+          <option *ngFor="let t of types" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button class="btn btn-primary flex-grow-1" (click)="onSearch()" [disabled]="isLoading()">Search</button>
+        <button class="btn btn-secondary" (click)="resetFilters()" [disabled]="isLoading()">Reset</button>
       </div>
     </div>
   </div>
 
-  <!-- Result By ID -->
-  <div *ngIf="resultById" class="card p-3">
-    <h3>Result for: <span class="text-primary">{{ resultById.complaintId }}</span></h3>
-    <div class="details-grid">
-      <p><strong>Submitted:</strong> {{ resultById.submittedAt | date:'medium' }}</p>
-      <p><strong>Status:</strong> <span class="badge badge-primary">{{ resultById.status }}</span></p>
-      <p><strong>Type:</strong> {{ resultById.complaintType }}</p>
-      <p><strong>Category:</strong> {{ resultById.category }}</p>
-    </div>
-    <div class="bg-light p-2 rounded mt-2">
-      <strong>Description:</strong> {{ resultById.description }}
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
-  <!-- Result List -->
-  <div *ngIf="!resultById && resultByStatus.length" class="card">
-    <h3>Results ({{ resultByStatus.length }})</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Complaint ID</th>
-          <th>Submitted</th>
-          <th>Type</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let c of resultByStatus">
-          <td>{{ c.complaintId }}</td>
-          <td>{{ c.submittedAt | date:'short' }}</td>
-          <td>{{ c.complaintType }}</td>
-          <td>
-            <span class="badge badge-primary">{{ c.status }}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Results Table -->
+  <div *ngIf="!isLoading()" class="card shadow-sm">
+    <div class="card-header bg-white">
+      <h5 class="mb-0">My Complaints ({{ totalElements() }})</h5>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Submitted On</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of complaints()">
+            <td>
+              <button class="btn btn-link text-decoration-none p-0 fw-bold" (click)="viewDetails(c.complaintId)">
+                {{ c.complaintId }}
+              </button>
+            </td>
+            <td><span class="badge bg-secondary">{{ c.complaintType }}</span></td>
+            <td>{{ c.category }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                  'bg-success': c.status === 'RESOLVED',
+                  'bg-warning text-dark': c.status === 'IN_PROGRESS',
+                  'bg-danger': c.status === 'OPEN',
+                  'bg-dark': c.status === 'CLOSED'
+                }">
+                {{ c.status }}
+              </span>
+            </td>
+            <td>{{ c.dateSubmitted | date:'short' }}</td>
+            <td class="text-truncate" style="max-width: 300px;">
+              <!-- View Mode -->
+              <div *ngIf="editingComplaintId() !== c.complaintId"
+                class="d-flex justify-content-between align-items-center">
+                <span class="text-truncate" title="{{c.description}}">{{ c.description }}</span>
+                <button class="btn btn-sm btn-link text-decoration-none p-0 ms-2" title="Edit Description"
+                  (click)="startEdit(c)">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+              </div>
+
+              <!-- Edit Mode -->
+              <div *ngIf="editingComplaintId() === c.complaintId" class="d-flex gap-2">
+                <input type="text" [(ngModel)]="editingDescription" class="form-control form-control-sm"
+                  [disabled]="isSubmittingEdit()">
+                <button class="btn btn-sm btn-success" (click)="saveDescription(c.complaintId)"
+                  [disabled]="isSubmittingEdit()">
+                  ✓
+                </button>
+                <button class="btn btn-sm btn-secondary" (click)="cancelEdit()" [disabled]="isSubmittingEdit()">
+                  ✕
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="complaints().length === 0">
+            <td colspan="6" class="text-center py-4 text-muted">No complaints found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalElements() > 0"
+      class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-muted small">Show:</span>
+        <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="form-select form-select-sm"
+          style="width: auto;">
+          <option *ngFor="let size of availablePageSizes" [value]="size">{{ size }}</option>
+        </select>
+        <span class="text-muted small">Page {{ currentPage() + 1 }} of {{ totalPages() || 1 }} (Total: {{
+          totalElements() }})</span>
+      </div>
+
+      <div *ngIf="totalPages() > 1">
+        <button class="btn btn-sm btn-outline-secondary me-1" [disabled]="currentPage() === 0"
+          (click)="onPageChange(currentPage() - 1)">
+          Previous
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" [disabled]="currentPage() === totalPages() - 1"
+          (click)="onPageChange(currentPage() + 1)">
+          Next
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div *ngIf="!resultById && !resultByStatus.length" class="alert alert-info mt-3">
-    No results found. Try a different ID or status.
+  <!-- Detail Modal -->
+  <div *ngIf="selectedComplaint()" class="modal-backdrop show"></div>
+  <div *ngIf="selectedComplaint()" class="modal d-block show" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Complaint #{{ selectedComplaint()?.complaintId }}</h5>
+          <button type="button" class="btn-close" (click)="closeDetails()"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="isLoadingDetails()" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoadingDetails() && selectedComplaint() as d" class="container-fluid">
+            <!-- Status Row -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Status:</strong>
+                <span class="badge ms-2 fs-6" [ngClass]="{
+                  'bg-success': d.status === 'RESOLVED',
+                  'bg-warning text-dark': d.status === 'IN_PROGRESS',
+                  'bg-danger': d.status === 'OPEN',
+                  'bg-dark': d.status === 'CLOSED'
+                }">{{ d.status }}</span>
+              </div>
+              <div class="col-md-6 text-end text-muted">
+                <small>Submitted: {{ d.dateSubmitted | date:'medium' }}</small>
+              </div>
+            </div>
+
+            <!-- Core Details -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <h6>Type & Category</h6>
+                <p class="mb-0">{{ d.complaintType }}</p>
+                <p class="text-muted small">{{ d.category }}</p>
+              </div>
+              <div class="col-md-6">
+                <h6>Assignment</h6>
+                <p class="mb-0" *ngIf="d.assignedToUserName">Assigned to: {{ d.assignedToUserName }}</p>
+                <p class="mb-0 text-muted fst-italic" *ngIf="!d.assignedToUserName">Unassigned</p>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="card bg-light mb-3">
+              <div class="card-body">
+                <h6 class="card-title">Description</h6>
+                <p class="card-text">{{ d.description }}</p>
+              </div>
+            </div>
+
+            <!-- Contact Info -->
+            <h6>Contact Preferences</h6>
+            <ul class="list-group list-group-flush mb-3">
+              <li class="list-group-item">Method: {{ d.preferredContactMethod }}</li>
+              <li class="list-group-item" *ngIf="d.contactEmail">Email: {{ d.contactEmail }}</li>
+              <li class="list-group-item" *ngIf="d.contactPhone">Phone: {{ d.contactPhone }}</li>
+            </ul>
+
+            <!-- Admin Notes -->
+            <div *ngIf="d.notes" class="alert alert-info">
+              <strong>Note from Support:</strong> {{ d.notes }}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDetails()">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-``

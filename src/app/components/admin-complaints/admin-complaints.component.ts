@@ -1,21 +1,11 @@
-
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, NonNullableFormBuilder, FormsModule, FormGroup } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { ComplaintService } from '../../services/common/complain/complaint.service';
-import { SearchCriteria } from '../../services/common/complain/complaint.service';
-import { Complaint,ComplaintStatus } from '../../model/complain';
+import { ReactiveFormsModule, FormBuilder, FormsModule, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 
-type UiStatus = 'Open' | 'In Progress' | 'Resolved' | 'Closed';
-
-// Map Pending -> Open (UI only)
-function toUiStatus(s: ComplaintStatus): UiStatus {
-  return s === 'Pending' ? 'Open' : (s as UiStatus);
-}
-function fromUiStatus(s: UiStatus): ComplaintStatus {
-  return s === 'Open' ? 'Pending' : (s as ComplaintStatus);
-}
+import { AdminComplaintService, AdminSearchCriteria } from '../../services/apis/adminComplaintList/admin-complaint.service';
+import { ComplaintStatus, Page, AdminComplaintDetailDTO } from '../../services/apis/complaintList/complaint-list.service';
+import { ComplaintType } from '../../services/apis/complaintRegister/complaint-register.service';
 
 @Component({
   selector: 'app-admin-complaints',
@@ -25,136 +15,106 @@ function fromUiStatus(s: UiStatus): ComplaintStatus {
   styleUrls: ['./admin-complaints.component.css']
 })
 export class AdminComplaintsComponent implements OnInit {
-  // Declare first; initialize in constructor to avoid "fb used before initialization"
   searchForm!: FormGroup;
 
-  complaints = signal<Complaint[]>([]);
-  errorMessage = signal<string>('');
+  // Data State
+  complaints = signal<AdminComplaintDetailDTO[]>([]);
+  totalElements = signal<number>(0);
+  totalPages = signal<number>(0);
+  currentPage = signal<number>(0);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
 
-  // Inline status update state
-  statuses: UiStatus[] = ['Open', 'In Progress', 'Resolved', 'Closed'];
-  editing: Record<string, { status: UiStatus; notes: string }> = {};
+  // Pagination State
+  pageSize = 20;
+
+  // Enums for Dropdowns
+  statuses: ComplaintStatus[] = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
+  types: ComplaintType[] = ['BILLING_ISSUE', 'POWER_OUTAGE', 'METER_FAULT', 'CONNECTION_REQUEST'];
 
   constructor(
-    private fb: NonNullableFormBuilder,  // <-- use NonNullable builder
+    private fb: FormBuilder,
     private router: Router,
-    private complaintService: ComplaintService
-  ) {
-    // Initialize form here (fb is available)
-    this.searchForm = this.fb.group({
-      customerId: '',      // all controls are non-nullable strings
-      consumerNumber: '',
-      complaintId: '',
-      complaintType: '',
-      startDate: '',       // yyyy-MM-dd
-      endDate: ''
-    });
-  }
+    private adminService: AdminComplaintService
+  ) { }
 
   ngOnInit(): void {
-    // Optionally show all on load
-    this.complaints.set(this.complaintService.getComplaints());
+    this.searchForm = this.fb.group({
+      complaintId: [''],
+      assignedToUserId: [''],
+      status: [''],
+      type: [''],
+      category: [''],
+      submittedFrom: [''],
+      submittedTo: [''],
+      q: ['']
+    });
+
+    // Load initial data
+    this.search();
   }
 
-  /** Normalize form value to SearchCriteria (string | undefined) */
-  private toCriteria(v: {
-    customerId: string;
-    consumerNumber: string;
-    complaintId: string;
-    complaintType: string;
-    startDate: string;
-    endDate: string;
-  }): SearchCriteria {
-    const trimOrUndef = (s: string) => (s && s.trim() ? s.trim() : undefined);
+  search(page: number = 0): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-    return {
-      customerId: trimOrUndef(v.customerId),
-      consumerNumber: trimOrUndef(v.consumerNumber),
-      complaintId: trimOrUndef(v.complaintId),
-      complaintType: trimOrUndef(v.complaintType),
-      startDate: v.startDate ? new Date(v.startDate).toISOString() : undefined,
-      endDate: v.endDate ? new Date(v.endDate).toISOString() : undefined
+    const v = this.searchForm.value;
+
+    const criteria: AdminSearchCriteria = {
+      page: page,
+      size: this.pageSize,
+      complaintId: v.complaintId || undefined,
+      assignedToUserId: v.assignedToUserId || undefined,
+      status: v.status || undefined,
+      type: v.type || undefined,
+      category: v.category || undefined,
+      submittedFrom: v.submittedFrom ? new Date(v.submittedFrom).toISOString() : undefined,
+      submittedTo: v.submittedTo ? new Date(v.submittedTo).toISOString() : undefined,
+      q: v.q || undefined,
+      sort: 'dateSubmitted,desc'
     };
-  }
 
-  search(): void {
-    this.errorMessage.set('');
-
-    // Get raw form value (all strings), normalize to SearchCriteria
-    const raw = this.searchForm.value as {
-      customerId: string;
-      consumerNumber: string;
-      complaintId: string;
-      complaintType: string;
-      startDate: string;
-      endDate: string;
-    };
-    const criteria = this.toCriteria(raw);
-
-    const results = this.complaintService.searchComplaints(criteria);
-
-    if (!results.length) {
-      if (criteria.customerId || criteria.complaintId) {
-        this.errorMessage.set('No matching Customer ID or Complaint ID found.');
-      } else {
-        this.errorMessage.set('No complaints match the search criteria.');
+    this.adminService.getComplaints(criteria).subscribe({
+      next: (pageData: Page<AdminComplaintDetailDTO>) => {
+        this.complaints.set(pageData.content);
+        this.totalElements.set(pageData.totalElements);
+        this.totalPages.set(pageData.totalPages);
+        this.currentPage.set(pageData.number);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Admin search failed', err);
+        this.isLoading.set(false);
+        this.errorMessage.set('Failed to load complaints.');
       }
-    }
-    this.complaints.set(results);
-
-    // Initialize editing entries for each result
-    this.editing = {};
-    results.forEach(c => {
-      this.editing[c.complaintId] = {
-        status: toUiStatus(c.status),
-        notes: c.adminNotes ?? ''
-      };
     });
   }
 
-  updateStatus(c: Complaint): void {
-    const edit = this.editing[c.complaintId];
-    if (!edit) return;
-
-    const updated = this.complaintService.updateComplaintStatus(
-      c.complaintId,
-      fromUiStatus(edit.status),
-      edit.notes
-    );
-
-    if (updated) {
-      alert(`Status updated for complaint ${updated.complaintId}.`);
-
-      // Refresh list using the current normalized criteria
-      const raw = this.searchForm.value as {
-        customerId: string; consumerNumber: string; complaintId: string;
-        complaintType: string; startDate: string; endDate: string;
-      };
-      const criteria = this.toCriteria(raw);
-      const list = this.complaintService.searchComplaints(criteria);
-      this.complaints.set(list);
+  onPageChange(newPage: number): void {
+    if (newPage >= 0 && newPage < this.totalPages()) {
+      this.search(newPage);
     }
+  }
+
+  clearFilters(): void {
+    this.searchForm.reset();
+    this.search(0);
+  }
+
+  viewDetails(id: number): void {
+    // You might want to implement a similar view/edit modal here as well
+    // For now, let's just log it or navigate if you have a detail page
+    console.log('View details', id);
+    // this.router.navigate(['/admin/complaints', id]); 
   }
 
   exportCSV(): void {
-    this.complaintService.exportComplaintsToCSV(this.complaints());
+    // Implement or call service logic
+    alert('Export CSV not implemented yet');
   }
 
   exportPDF(): void {
-    // Uses browser print-to-PDF on the table element
-    this.complaintService.exportTableToPDFByPrint('admin-table');
-  }
-
-  openSummary(c: Complaint): void {
-    this.router.navigate(['/admin/complaints', c.complaintId]);
-  }
-
-  statusClass(uiStatus: UiStatus): string {
-    switch (uiStatus) {
-      case 'Open': return 'badge open';
-      case 'In Progress': return 'badge progress';
-      case 'Resolved': return 'badge resolved';
-      case 'Closed': return 'badge closed';
-    }
+    // Implement or call service logic
+    alert('Export PDF not implemented yet');
   }
 }

@@ -5,12 +5,15 @@ import { RoleService, UserRole } from '../../common/role.service';
 
 export interface LoginRequest {
   username: string;
-  password: string;  
+  password: string;
 }
 
 export interface LoginResponse {
   token?: string;
-  role?:string
+  role?: string;
+  userId?: number;
+  username?: string;
+  message?: string;
 }
 
 
@@ -25,16 +28,16 @@ export class LoginApiService {
 
   constructor() { }
 
-  
+
   async login(body: LoginRequest): Promise<LoginResponse> {
     const url = `${this.baseUrl}api/auth/login`;
-    const apiBody = body; 
+    const apiBody = body;
 
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',  
-        'Accept': 'application/json',       
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify(apiBody),
     });
@@ -48,9 +51,9 @@ export class LoginApiService {
       }
       throw new Error(message);
     }
- 
+
     const data = (await res.json()) as LoginResponse;
- 
+
     if (data?.token && data?.role) {
       this.roleService.token = data.token;
       this.roleService.role = data.role as UserRole;

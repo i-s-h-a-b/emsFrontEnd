@@ -1,99 +1,97 @@
 <div class="container mt-3">
   <h2>Complaint Registration</h2>
 
-  <form [formGroup]="form" (ngSubmit)="submit()" novalidate *ngIf="!submittedComplaint()" class="card p-3">
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate *ngIf="!submittedComplaint()" class="card p-3 shadow-sm">
+    
+    <div *ngIf="errorMessage()" class="alert alert-danger">
+      {{ errorMessage() }}
+    </div>
+
     <!-- Complaint Type -->
-    <div class="form-group">
-      <label>Complaint Type <span class="text-danger">*</span></label>
-      <select formControlName="complaintType">
+    <div class="form-group mb-3">
+      <label class="form-label">Complaint Type <span class="text-danger">*</span></label>
+      <select formControlName="complaintType" class="form-select">
         <option value="" disabled>Select type</option>
         <option *ngFor="let t of complaintTypes" [value]="t">{{ t }}</option>
       </select>
-      <div class="error-msg" *ngIf="form.get('complaintType')?.touched && form.get('complaintType')?.invalid">
+      <div class="text-danger small" *ngIf="form.get('complaintType')?.touched && form.get('complaintType')?.invalid">
         Please select a complaint type.
       </div>
     </div>
 
-    <!-- Category (depends on type) -->
-    <div class="form-group">
-      <label>Category <span class="text-danger">*</span></label>
-      <select formControlName="category">
-        <option value="" disabled>Select category</option>
-        <option *ngFor="let c of categories()" [value]="c">{{ c }}</option>
-      </select>
-      <div class="error-msg" *ngIf="form.get('category')?.touched && form.get('category')?.invalid">
-        Please select a category.
-      </div>
-    </div>
-
     <!-- Description -->
-    <div class="form-group">
-      <label>Description <span class="text-danger">*</span></label>
-      <textarea formControlName="description" rows="4" [attr.maxLength]="descriptionMaxLen"
-        placeholder="Provide details of your complaint"></textarea>
-      <div class="text-right text-muted small">
+    <div class="form-group mb-3">
+      <label class="form-label">Description <span class="text-danger">*</span></label>
+      <textarea formControlName="description" class="form-control" rows="5" [attr.maxLength]="descriptionMaxLen"
+        placeholder="Provide details of your complaint (min 10 characters)"></textarea>
+      <div class="text-end text-muted small">
         {{ form.get('description')?.value?.length || 0 }}/{{ descriptionMaxLen }}
       </div>
-      <div class="error-msg" *ngIf="form.get('description')?.touched && form.get('description')?.invalid">
-        Description is required (max {{ descriptionMaxLen }} characters).
+      <div class="text-danger small" *ngIf="form.get('description')?.touched && form.get('description')?.invalid">
+        Description is required (min 10 characters).
       </div>
     </div>
 
     <!-- Preferred Contact Method -->
-    <div class="form-group">
-      <label class="d-block mb-2">Preferred Contact Method <span class="text-danger">*</span></label>
+    <div class="form-group mb-3">
+      <label class="d-block mb-2 form-label">Preferred Contact Method <span class="text-danger">*</span></label>
       <div class="d-flex gap-3">
-        <label class="d-flex align-items-center gap-2">
-          <input type="radio" formControlName="contactMethod" value="email"> Email
-        </label>
-        <label class="d-flex align-items-center gap-2">
-          <input type="radio" formControlName="contactMethod" value="phone"> Phone
-        </label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" formControlName="preferredContactMethod" value="EMAIL" id="methodEmail">
+          <label class="form-check-label" for="methodEmail">Email</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" formControlName="preferredContactMethod" value="PHONE" id="methodPhone">
+          <label class="form-check-label" for="methodPhone">Phone</label>
+        </div>
       </div>
     </div>
 
     <!-- Contact Details -->
     <div class="row">
-      <div class="col-half">
-        <label>Email</label>
-        <input type="email" formControlName="contactEmail" placeholder="your@email.com">
-        <div class="error-msg" *ngIf="form.get('contactEmail')?.touched && form.get('contactEmail')?.invalid">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" formControlName="contactEmail" class="form-control" placeholder="your@email.com">
+        <div class="text-danger small" *ngIf="form.get('contactEmail')?.touched && form.get('contactEmail')?.invalid">
           Valid email required.
         </div>
       </div>
-      <div class="col-half">
-        <label>Phone</label>
-        <input type="tel" formControlName="contactPhone" placeholder="9999999999">
-        <div class="error-msg" *ngIf="form.get('contactPhone')?.touched && form.get('contactPhone')?.invalid">
-          Valid 10-digit phone required.
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Phone</label>
+        <input type="tel" formControlName="contactPhone" class="form-control" placeholder="9999999999">
+        <div class="text-danger small" *ngIf="form.get('contactPhone')?.touched && form.get('contactPhone')?.invalid">
+          Valid phone number required.
         </div>
       </div>
     </div>
 
     <!-- Actions -->
-    <div class="mt-3 d-flex gap-2">
-      <button type="submit" [disabled]="form.invalid" class="btn">Submit</button>
-      <button type="button" class="btn btn-secondary" (click)="resetPage()">Reset</button>
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" [disabled]="form.invalid || isLoading()" class="btn btn-primary">
+        <span *ngIf="isLoading()" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Submit
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="resetPage()" [disabled]="isLoading()">Reset</button>
     </div>
   </form>
 
   <!-- Submission Confirmation -->
-  <div *ngIf="submittedComplaint()" class="card p-3 text-center">
-    <h3 class="text-success">Complaint Submitted Successfully</h3>
-    <div class="receipt-details text-left my-3 p-3 bg-light rounded">
+  <div *ngIf="submittedComplaint()" id="confirmation" class="card p-4 text-center shadow-sm mt-3">
+    <h3 class="text-success mb-3">Complaint Submitted Successfully</h3>
+    <div class="text-start my-3 p-3 bg-light rounded border">
       <p><strong>Complaint ID:</strong> {{ submittedComplaint()?.complaintId }}</p>
-      <p *ngIf="estimatedResolutionHours() !== null">
-        <strong>Estimated Resolution:</strong> {{ estimatedResolutionHours() }} hours
-      </p>
+      <p><strong>Status:</strong> <span class="badge bg-warning text-dark">{{ submittedComplaint()?.status }}</span></p>
       <hr>
-      <p><strong>Type:</strong> {{ submittedComplaint()?.complaintType }} - {{ submittedComplaint()?.category }}</p>
+      <p><strong>Type:</strong> {{ submittedComplaint()?.complaintType }}</p>
+      <p><strong>Category:</strong> {{ submittedComplaint()?.category }}</p>
       <p><strong>Description:</strong> {{ submittedComplaint()?.description }}</p>
-      <p><strong>Status:</strong> <span class="badge badge-warning">{{ submittedComplaint()?.status }}</span></p>
+      <p><strong>Date Submitted:</strong> {{ submittedComplaint()?.dateSubmitted | date:'medium' }}</p>
     </div>
 
-    <div class="d-flex justify-content-center gap-2">
-      <button class="btn btn-secondary" (click)="goToDashboard()">Go to Dashboard</button>
-      <button class="btn" (click)="viewStatus()">View Status</button>
+    <div class="d-flex justify-content-center gap-2 mt-3">
+      <button class="btn btn-outline-secondary" (click)="goToDashboard()">Go to Dashboard</button>
+      <button class="btn btn-primary" (click)="viewStatus()">View Status</button>
+      <button class="btn btn-link" (click)="resetPage()">Submit Another</button>
     </div>
   </div>
 </div>

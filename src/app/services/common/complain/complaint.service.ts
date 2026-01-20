@@ -1,7 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Complaint,ComplaintStatus } from '../../../model/complain';
+import { Complaint, ComplaintStatus } from '../../../model/complain';
 
 const STORAGE_KEY = 'ems_complaints';
+
+// {
+//   "complaintType": "BILLING_ISSUE",
+//   "description": "stringstri",
+//   "contactEmail": "string",
+//   "contactPhone": "string",
+//   "assignedToUserId": 9007199254740991,
+//   "preferredContactMethod": "EMAIL"
+// }
 
 export interface SearchCriteria {
   customerId?: string;
@@ -15,7 +24,7 @@ export interface SearchCriteria {
 @Injectable({ providedIn: 'root' })
 export class ComplaintService {
   private complaints: Complaint[] = [
-    
+
   ];
 
   constructor() {
@@ -152,7 +161,7 @@ export class ComplaintService {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `complaints_${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = `complaints_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }

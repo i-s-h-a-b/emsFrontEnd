@@ -1,11 +1,15 @@
-
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { ComplaintService } from '../../services/common/complain/complaint.service';
-import { Complaint,ContactMethod } from '../../model/complain';
+import {
+  ComplaintRegisterService,
+  ComplaintType,
+  PreferredContactMethod,
+  CreateComplaintRequest,
+  ComplaintResponse
+} from '../../services/apis/complaintRegister/complaint-register.service';
 
 @Component({
   selector: 'app-complaint-form',
@@ -16,94 +20,78 @@ import { Complaint,ContactMethod } from '../../model/complain';
 })
 export class ComplaintFormComponent implements OnInit {
 
-  // Autofilled & editable contact info (you can load from user profile later)
+  // Default values
   registeredEmail = 'user@example.com';
   registeredPhone = '9876543210';
 
-  // Types & dependent categories
-  complaintTypes = [
-    'Billing Issue',
-    'Power Outage',
-    'Meter Reading Issue'
+  complaintTypes: ComplaintType[] = [
+    'BILLING_ISSUE',
+    'POWER_OUTAGE',
+    'METER_FAULT',
+    'CONNECTION_REQUEST'
   ];
 
-  typeToCategories: Record<string, string[]> = {
-    'Billing Issue': ['Overcharge', 'Late Payment', 'Incorrect Tariff'],
-    'Power Outage': ['Scheduled Maintenance', 'Unexpected Outage', 'Transformer Fault'],
-    'Meter Reading Issue': ['Reading Not Taken', 'Faulty Meter', 'Reading Discrepancy']
-  };
+  descriptionMaxLen = 5000; // Updated to match backend constraint
 
-  // Signal to hold currently available categories
-  categories = signal<string[]>([]);
-  descriptionMaxLen = 500;
-
-  // Reactive form (declare first, initialize later to avoid “fb used before initialization”)
   form!: FormGroup;
-
-  // Confirmation state
-  submittedComplaint = signal<Complaint | null>(null);
-
-  // Estimated resolution (computed for confirmation only, not stored in model)
-  estimatedResolutionHours = computed(() => {
-    const type = this.submittedComplaint()?.complaintType;
-    if (!type) return null;
-    const map: Record<string, number> = {
-      'Billing Issue': 48,
-      'Power Outage': 4,
-      'Meter Reading Issue': 24
-    };
-    return map[type] ?? 72;
-  });
+  submittedComplaint = signal<ComplaintResponse | null>(null);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private complaintService: ComplaintService
-  ) {}
+    private complaintRegisterService: ComplaintRegisterService
+  ) { }
 
   ngOnInit(): void {
-    // Initialize the form here (fb is available now)
     this.form = this.fb.group({
       complaintType: ['', Validators.required],
-      category: ['', Validators.required],
-      description: ['', [Validators.required, Validators.maxLength(this.descriptionMaxLen)]],
-      contactMethod: ['email' as ContactMethod, Validators.required],
+      description: ['', [
+        Validators.required,
+        Validators.minLength(10), // Backend min size
+        Validators.maxLength(this.descriptionMaxLen)
+      ]],
+      preferredContactMethod: ['EMAIL' as PreferredContactMethod, Validators.required],
       contactEmail: ['', [Validators.email]],
-      contactPhone: ['', [Validators.pattern(/^[0-9]{10}$/)]],
+      contactPhone: ['', [Validators.pattern(/^[0-9]{10,15}$/)]], // Adjusted phone pattern
     });
 
-    // Autofill contact fields
+    // Autofill defaults (optional - can be removed if not needed)
     this.form.patchValue({
       contactEmail: this.registeredEmail,
       contactPhone: this.registeredPhone
     });
 
-    // Update categories when complaintType changes
-    this.form.get('complaintType')?.valueChanges.subscribe(type => {
-      const list = this.typeToCategories[type || ''] || [];
-      this.categories.set(list);
-      // reset category when type changes
-      this.form.get('category')?.setValue('');
+    // Dynamic validation
+    this.form.get('preferredContactMethod')?.valueChanges.subscribe((method: PreferredContactMethod) => {
+      this.updateContactValidators(method);
     });
 
-    // Dynamic validation based on contactMethod
-    this.form.get('contactMethod')?.valueChanges.subscribe(method => {
-      const emailCtrl = this.form.get('contactEmail');
-      const phoneCtrl = this.form.get('contactPhone');
+    // Initial validation check
+    this.updateContactValidators(this.form.get('preferredContactMethod')?.value);
+  }
 
-      if (method === 'email') {
-        emailCtrl?.addValidators([Validators.required, Validators.email]);
-        phoneCtrl?.removeValidators([Validators.required, Validators.pattern(/^[0-9]{10}$/)]);
-      } else {
-        phoneCtrl?.addValidators([Validators.required, Validators.pattern(/^[0-9]{10}$/)]);
-        emailCtrl?.removeValidators([Validators.required, Validators.email]);
-      }
-      emailCtrl?.updateValueAndValidity();
-      phoneCtrl?.updateValueAndValidity();
-    });
+  private updateContactValidators(method: PreferredContactMethod): void {
+    const emailCtrl = this.form.get('contactEmail');
+    const phoneCtrl = this.form.get('contactPhone');
 
-    // Trigger initial validators for default contact method
-    this.form.get('contactMethod')?.updateValueAndValidity({ onlySelf: true });
+    if (method === 'EMAIL') {
+      // Email is preferred, maybe required? Backend says "optional override" usually,
+      // but if it's preferred, we probably want it filled.
+      // Adjust logic as per specific business rule. 
+      // Assuming if preferred, we encourage it, but backend constraints say "optional".
+      // Let's keep strict validation if the user chooses it as preferred.
+      emailCtrl?.addValidators([Validators.required, Validators.email]);
+      phoneCtrl?.removeValidators([Validators.required]);
+      phoneCtrl?.setValidators([Validators.pattern(/^[0-9]{10,15}$/)]);
+    } else {
+      phoneCtrl?.addValidators([Validators.required, Validators.pattern(/^[0-9]{10,15}$/)]);
+      emailCtrl?.removeValidators([Validators.required]);
+      emailCtrl?.setValidators([Validators.email]);
+    }
+    emailCtrl?.updateValueAndValidity();
+    phoneCtrl?.updateValueAndValidity();
   }
 
   submit(): void {
@@ -112,49 +100,56 @@ export class ComplaintFormComponent implements OnInit {
       return;
     }
 
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
     const v = this.form.value;
 
-    const saved = this.complaintService.addComplaint({
-      complaintType: v.complaintType!,
-      category: v.category!,
-      description: v.description!,
-      contactMethod: v.contactMethod!,
-      contactEmail: v.contactMethod === 'email' ? v.contactEmail! : undefined,
-      contactPhone: v.contactMethod === 'phone' ? v.contactPhone! : undefined,
+    const request: CreateComplaintRequest = {
+      complaintType: v.complaintType,
+      description: v.description,
+      preferredContactMethod: v.preferredContactMethod,
+      // Only send if they have values
+      contactEmail: v.contactEmail || undefined,
+      contactPhone: v.contactPhone || undefined
+    };
+
+    this.complaintRegisterService.createComplaint(request).subscribe({
+      next: (response) => {
+        this.isLoading.set(false);
+        this.submittedComplaint.set(response);
+        setTimeout(() => document.getElementById('confirmation')?.scrollIntoView({ behavior: 'smooth' }), 50);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        console.error('Submission failed', err);
+        this.errorMessage.set('Failed to submit complaint. Please try again later.');
+      }
     });
-
-    this.submittedComplaint.set(saved);
-
-    // Smooth scroll to confirmation
-    setTimeout(() => document.getElementById('confirmation')?.scrollIntoView({ behavior: 'smooth' }), 50);
   }
 
   resetPage(): void {
-    // Reset form to initial state
     this.form.reset({
       complaintType: '',
-      category: '',
       description: '',
-      contactMethod: 'email',
-      contactEmail: this.registeredEmail,
-      contactPhone: this.registeredPhone
+      preferredContactMethod: 'EMAIL',
     });
-    this.categories.set([]);
     this.submittedComplaint.set(null);
+    this.errorMessage.set(null);
 
-    // Refresh route as requested
+    // Refresh
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
       this.router.navigate(['/complaints/new']);
     });
-    // Alternatively: window.location.reload(); (but router refresh is smoother)
   }
 
   goToDashboard(): void {
-    // You can change this to your main dashboard later
-    this.router.navigate(['/complaints/history']);
+    this.router.navigate(['/dashboard']); // Update to correct dashboard route if needed
   }
 
   viewStatus(): void {
-    this.router.navigate(['/complaints/status']);
+    // Navigate to status page for this specific complaint usually
+    // this.router.navigate(['/complaints', this.submittedComplaint()?.complaintId]);
+    this.router.navigate(['/complaints/history']);
   }
 }

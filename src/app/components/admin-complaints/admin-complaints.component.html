@@ -2,91 +2,138 @@
   <h2>Admin - Complaints</h2>
 
   <!-- Search -->
-  <form [formGroup]="searchForm" (ngSubmit)="search()" class="card p-3 mb-3">
+  <form [formGroup]="searchForm" (ngSubmit)="search(0)" class="card p-3 mb-3 shadow-sm">
     <h5>Search Filters</h5>
-    <div class="row">
-      <div class="col-four">
-        <label>Customer ID</label>
-        <input formControlName="customerId" placeholder="CUST123">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Complaint ID</label>
+        <input type="number" formControlName="complaintId" class="form-control" placeholder="101">
       </div>
-      <div class="col-four">
-        <label>Consumer No</label>
-        <input formControlName="consumerNumber" placeholder="CN-0001">
+      <div class="col-md-3">
+        <label class="form-label">Assigned User ID</label>
+        <input type="number" formControlName="assignedToUserId" class="form-control" placeholder="User ID">
       </div>
-      <div class="col-four">
-        <label>Complaint ID</label>
-        <input formControlName="complaintId" placeholder="CMP-...">
+      <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select formControlName="status" class="form-select">
+          <option value="">All</option>
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
       </div>
-      <div class="col-four">
-        <label>Complaint Type</label>
-        <input formControlName="complaintType" placeholder="Billing Issue...">
+      <div class="col-md-3">
+        <label class="form-label">Type</label>
+        <select formControlName="type" class="form-select">
+          <option value="">All</option>
+          <option *ngFor="let t of types" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Category</label>
+        <input type="text" formControlName="category" class="form-control" placeholder="Category">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Date From</label>
+        <input type="datetime-local" formControlName="submittedFrom" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Date To</label>
+        <input type="datetime-local" formControlName="submittedTo" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Keyword Search</label>
+        <input type="text" formControlName="q" class="form-control" placeholder="Description...">
       </div>
     </div>
 
-    <div class="row mt-2">
-      <div class="col-half">
-        <label>Start Date</label>
-        <input type="date" formControlName="startDate">
-      </div>
-      <div class="col-half">
-        <label>End Date</label>
-        <input type="date" formControlName="endDate">
-      </div>
-    </div>
-
-    <div class="actions mt-3">
-      <button type="submit" class="btn">Search</button>
-      <button type="button" class="btn btn-secondary" (click)="complaints.set([]); errorMessage.set(''); searchForm.reset()">Clear</button>
+    <div class="actions mt-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Search</button>
+      <button type="button" class="btn btn-secondary" (click)="clearFilters()" [disabled]="isLoading()">Clear</button>
     </div>
   </form>
 
-  <p class="alert alert-danger" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
 
   <!-- Results & Export -->
-  <div class="card p-3" *ngIf="complaints().length">
-    <div class="d-flex justify-content-between mb-3">
-      <h4>Results ({{ complaints().length }})</h4>
+  <div class="card p-3 shadow-sm" *ngIf="!isLoading() && totalElements() > 0">
+    <div class="d-flex justify-content-between mb-3 align-items-center">
+      <h5 class="mb-0">Results ({{ totalElements() }})</h5>
       <div class="d-flex gap-2">
-        <button class="btn btn-sm btn-secondary" (click)="exportCSV()">Export CSV</button>
-        <button class="btn btn-sm btn-secondary" (click)="exportPDF()">Export PDF</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="exportCSV()">Export CSV</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="exportPDF()">Export PDF</button>
       </div>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Consumer</th>
-          <th>Type</th>
-          <th>Submitted</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let c of complaints()">
-          <td>{{ c.complaintId }}</td>
-          <td>
-            <div class="small">{{ c.customerId || '-' }}</div>
-            <div class="small text-muted">{{ c.consumerNumber || '-' }}</div>
-          </td>
-          <td>{{ c.complaintType }}</td>
-          <td>{{ c.submittedAt | date:'shortDate' }}</td>
-          <td>
-            <span class="badge" [class.badge-primary]="editing[c.complaintId].status === 'Open'" [class.badge-success]="editing[c.complaintId].status === 'Resolved'">
-              {{ editing[c.complaintId].status || 'Open' }}
-            </span>
-          </td>
-          <td>
-            <div class="d-flex gap-2">
-              <button class="btn btn-secondary btn-sm" (click)="openSummary(c)">View</button>
-              <button class="btn btn-sm" (click)="updateStatus(c)">Edit</button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Type / Category</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of complaints()">
+            <td><strong>{{ c.complaintId }}</strong></td>
+            <td>
+              <div>ID: {{ c.customerId }}</div>
+            </td>
+            <td>
+              <div class="badge bg-secondary mb-1">{{ c.complaintType }}</div>
+              <div class="small text-muted">{{ c.category || '-' }}</div>
+            </td>
+            <td>{{ c.dateSubmitted | date:'short' }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                  'bg-success': c.status === 'RESOLVED',
+                  'bg-warning text-dark': c.status === 'IN_PROGRESS',
+                  'bg-danger': c.status === 'OPEN',
+                  'bg-dark': c.status === 'CLOSED'
+                }">
+                {{ c.status }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="c.assignedToUserId">{{ c.assignedToUserName || c.assignedToUserId }}</span>
+              <span *ngIf="!c.assignedToUserId" class="text-muted fst-italic">Unassigned</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-primary" (click)="viewDetails(c.complaintId)">View</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages() > 1" class="d-flex justify-content-between align-items-center mt-3">
+      <span class="text-muted small">Page {{ currentPage() + 1 }} of {{ totalPages() }}</span>
+      <div>
+        <button class="btn btn-sm btn-outline-secondary me-1" [disabled]="currentPage() === 0"
+          (click)="onPageChange(currentPage() - 1)">
+          Previous
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" [disabled]="currentPage() === totalPages() - 1"
+          (click)="onPageChange(currentPage() + 1)">
+          Next
+        </button>
+      </div>
+    </div>
   </div>
 
-  <p *ngIf="!complaints().length && !errorMessage()" class="alert alert-info mt-3">No results found. Use filters above.</p>
+  <div *ngIf="!isLoading() && totalElements() === 0 && !errorMessage()" class="alert alert-info mt-3">
+    No results found. Try adjusting filters.
+  </div>
 </div>
