@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AdminSmeService, CreateSmeRequest, SmeResponse } from '../services/apis/adminSmeList/admin-sme.service';
+import { AddSmeService, SmeCreateRequest, SmeResponse } from '../services/apis/addSme/add-sme.service';
 
 @Component({
   selector: 'app-add-sme',
@@ -20,7 +20,7 @@ export class RegisterSmeComponent {
 
   constructor(
     private fb: FormBuilder,
-    private adminSmeService: AdminSmeService,
+    private addSmeService: AddSmeService,
     private router: Router
   ) {
     this.initForm();
@@ -37,7 +37,7 @@ export class RegisterSmeComponent {
     });
   }
 
-  submit(): void {
+  async submit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -46,19 +46,17 @@ export class RegisterSmeComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const request: CreateSmeRequest = this.form.value;
+    const request: SmeCreateRequest = this.form.value;
 
-    this.adminSmeService.createSme(request).subscribe({
-      next: (res) => {
-        this.isLoading.set(false);
-        this.createdSme.set(res);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        console.error(err);
-        this.errorMessage.set(err?.error?.message || 'Failed to create SME');
-      }
-    });
+    try {
+      const res = await this.addSmeService.createSme(request);
+      this.isLoading.set(false);
+      this.createdSme.set(res);
+    } catch (err: any) {
+      this.isLoading.set(false);
+      console.error(err);
+      this.errorMessage.set(err?.error?.message || 'Failed to create SME');
+    }
   }
 
   reset(): void {
