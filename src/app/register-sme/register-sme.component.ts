@@ -1,44 +1,73 @@
-
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AdminSmeService, CreateSmeRequest, SmeResponse } from '../services/apis/adminSmeList/admin-sme.service';
 
 @Component({
-  selector: 'app-register-sme',
-  imports: [FormsModule, CommonModule],
+  selector: 'app-add-sme',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register-sme.component.html',
-  styleUrl: './register-sme.component.css'
+  styleUrls: ['./register-sme.component.css']
 })
 export class RegisterSmeComponent {
 
-  registerObj: any = {
-    consumerNumber: '',
-    fullName: '',
-    email: '',
-    mobileNumber: '',
-    userId: '',
-    password: '',
-    confirmPassword: ''
-  };
+  form!: FormGroup;
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+  createdSme = signal<SmeResponse | null>(null);
 
-  confirmationMessage: string = '';
+  constructor(
+    private fb: FormBuilder,
+    private adminSmeService: AdminSmeService,
+    private router: Router
+  ) {
+    this.initForm();
+  }
 
-  onRegister(form: any) {
-    if (form.invalid) {
-      alert('Please fill all required fields correctly.');
+  private initForm(): void {
+    this.form = this.fb.group({
+      fname: ['', [Validators.required, Validators.maxLength(100)]],
+      lname: ['', [Validators.required, Validators.maxLength(100)]],
+      mobileNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10,15}$/)]],
+      userEmail: ['', [Validators.required, Validators.email]],
+      username: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
+
+  submit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
       return;
     }
 
-    if (this.registerObj.password !== this.registerObj.confirmPassword) {
-      alert('Passwords do not match.');
-      return;
-    }
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-    const empId = 'SME-' + Math.floor(100000 + Math.random() * 900000);
+    const request: CreateSmeRequest = this.form.value;
 
-    alert( `Registration successful! 
-      Employee ID: ${empId}, 
-      Name: ${this.registerObj.fullName}, 
-      Email: ${this.registerObj.email}`);
+    this.adminSmeService.createSme(request).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        this.createdSme.set(res);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        console.error(err);
+        this.errorMessage.set(err?.error?.message || 'Failed to create SME');
+      }
+    });
+  }
+
+  reset(): void {
+    this.form.reset();
+    this.createdSme.set(null);
+    this.errorMessage.set(null);
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin']);
   }
 }
