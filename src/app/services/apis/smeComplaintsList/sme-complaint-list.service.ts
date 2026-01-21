@@ -5,7 +5,7 @@ import { environment } from '../../../environment';
 import { Page, ComplaintStatus, AdminComplaintDetailDTO } from '../complaintList/complaint-list.service';
 import { ComplaintType } from '../complaintRegister/complaint-register.service';
 
-export interface AdminSearchCriteria {
+export interface SmeSearchCriteria {
     page?: number;
     size?: number;
     complaintId?: number;
@@ -20,12 +20,11 @@ export interface AdminSearchCriteria {
 }
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
-export class AdminComplaintService {
-
-    private readonly baseUrl = environment.apiBaseUrl;
-    private apiUrl = `${this.baseUrl}api/complaints/admin`;
+export class SmeComplaintListService {
+   private readonly baseUrl = environment.apiBaseUrl;
+    private apiUrl = `${this.baseUrl}api/complaints/sme`;
 
     constructor(private http: HttpClient) { }
 
@@ -33,14 +32,14 @@ export class AdminComplaintService {
      * List complaints for Admin with advanced fitlers.
      * Matches: GET /api/complaints/admin
      */
-    getComplaints(criteria: AdminSearchCriteria): Observable<Page<AdminComplaintDetailDTO>> {
+    getComplaints(criteria: SmeSearchCriteria): Observable<Page<AdminComplaintDetailDTO>> {
         let params = new HttpParams()
             .set('page', criteria.page ?? 0)
             .set('size', criteria.size ?? 20)
             .set('sort', criteria.sort ?? 'dateSubmitted,desc');
 
         if (criteria.complaintId) params = params.set('complaintId', criteria.complaintId);
-        if (criteria.assignedToUserId) params = params.set('assignedToUserId', criteria.assignedToUserId);
+        //if (criteria.assignedToUserId) params = params.set('assignedToUserId', criteria.assignedToUserId);
         if (criteria.status) params = params.set('status', criteria.status);
         if (criteria.type) params = params.set('type', criteria.type);
         if (criteria.category) params = params.set('category', criteria.category);
@@ -61,20 +60,17 @@ export class AdminComplaintService {
         // Backend you shared accepts body: { status: "OPEN" }
         return this.http.patch<AdminComplaintDetailDTO>(url, { status });
     }
-
-    addNotesInComplaint(complaintId: number, note:String){
+ addNotesInComplaint(complaintId: number, note:String){
         const url = `${this.baseUrl}api/complaints/${complaintId}/notes`;
         // Backend you shared accepts body: { status: "OPEN" }
         return this.http.post<AdminComplaintDetailDTO>(url, { note });
     }
 
     
-    assignComplaint(complaintId: number, userId: number) {
-    const url = `${this.baseUrl}api/complaints/${complaintId}/assign`;
-    return this.http.post<AdminComplaintDetailDTO>(url, null, {
-        params: { userId }
-    });
-    }
-
+acceptComplaint(complaintId: number) {
+  const url = `${this.baseUrl}api/complaints/${complaintId}/accept`;
+  return this.http.post<AdminComplaintDetailDTO>(url, {});
+}
 
 }
+

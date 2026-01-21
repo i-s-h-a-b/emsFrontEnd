@@ -1,144 +1,306 @@
-<header class="app-header">
-  <h1>{{ title }}</h1>
-</header>
-<div class="container">
-  <h2>SME Complaint Management</h2>
+<div class="container mt-3">
+  <h2>SME - Complaints</h2>
 
-  <!-- ===================== Search Section ===================== -->
-  <section class="search">
-    <div class="field">
-      <label>Customer ID / Consumer No</label>
-      <input
-        type="text"
-        [ngModel]="search().customerId"
-        (ngModelChange)="setSearch('customerId', $event)"
-        placeholder="e.g., CU001" />
-    </div>
-
-    <div class="field">
-      <label>Complaint ID</label>
-      <input
-        type="text"
-        [ngModel]="search().complaintId"
-        (ngModelChange)="setSearch('complaintId', $event)"
-        placeholder="e.g., C101" />
-    </div>
-
-    <div class="field">
-      <label>Complaint Type</label>
-      <select
-        [ngModel]="search().complaintType"
-        (ngModelChange)="setSearch('complaintType', $event)">
-        <option value="">Any</option>
-        <option *ngFor="let t of complaintTypes" [value]="t">{{ t }}</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>Date From</label>
-      <input
-        type="date"
-        [ngModel]="search().dateFrom"
-        (ngModelChange)="setSearch('dateFrom', $event)" />
-    </div>
-
-    <div class="field">
-      <label>Date To</label>
-      <input
-        type="date"
-        [ngModel]="search().dateTo"
-        (ngModelChange)="setSearch('dateTo', $event)" />
-    </div>
-
-    <div class="actions">
-      <!-- Computed list updates automatically when search signal changes -->
-      <button class="btn btn-primary" (click)="null">Search</button>
-      <button class="btn btn-secondary" (click)="clearSearch()">Clear</button>
-    </div>
-  </section>
-
-  <!-- ===================== Export Buttons ===================== -->
-  <section class="export">
-    <button class="btn btn-primary" (click)="exportCSV()">Export CSV</button>
-    <button class="btn btn-warn" (click)="exportPDF()">Export PDF</button>
-  </section>
-
-  <!-- ===================== Complaints Table ===================== -->
-  <section class="table-wrapper">
-    <table class="table">
-        <!-- Table header -->
-        <thead>
-        <tr>
-        <th>Complaint ID</th>
-        <th>Customer ID / Consumer No</th>
-        <th>Complaint Type</th>
-        <th>Date Submitted</th>
-        <th>Status</th>
-        <th>Last Updated</th>
-        <th>Notes</th> <!-- ✅ New column -->
-        <th>Actions</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <!-- Display rows -->
-        <tr *ngFor="let c of filteredComplaints()">
-        <td>{{ c.complaintId }}</td>
-        <td>{{ c.customerId }}</td>
-        <td>{{ c.complaintType }}</td>
-        <td>{{ c.dateSubmitted }}</td>
-        <td><span [class]="statusClass(c.status)">{{ c.status }}</span></td>
-        <td>{{ c.lastUpdated }}</td>
-
-        <!-- ✅ Notes column with truncation and tooltip -->
-        <td>
-        <span class="note-preview" [title]="c.notes || ''">
-        {{ (c.notes || '') | slice:0:60 }}<ng-container *ngIf="(c.notes || '').length > 60">…</ng-container>
-        </span>
-        </td>
-
-        <td>
-        <button class="btn btn-link" (click)="startEdit(c)" *ngIf="editingId() !== c.complaintId">Update</button>
-        </td>
-        </tr>
-
-        <!-- Inline edit panel row (unchanged) -->
-        <tr *ngFor="let c of filteredComplaints()" [hidden]="editingId() !== c.complaintId">
-        <td colspan="8"> <!-- ✅ colspan increased to include Notes + Actions -->
-        <div class="edit-panel">
-        <div class="field">
-        <label>Status</label>
-        <select [ngModel]="editStatus()" (ngModelChange)="editStatus.set($event)">
-        <option>Open</option>
-        <option>In Progress</option>
-        <option>Resolved</option>
+  <!-- Search -->
+  <form [formGroup]="searchForm" (ngSubmit)="search(0)" class="card p-3 mb-3 shadow-sm">
+    <h5>Search Filters</h5>
+    <div class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Complaint ID</label>
+        <input type="number" formControlName="complaintId" class="form-control" placeholder="101">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select formControlName="status" class="form-select">
+          <option value="">All</option>
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
         </select>
-        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Type</label>
+        <select formControlName="type" class="form-select">
+          <option value="">All</option>
+          <option *ngFor="let t of types" [value]="t">{{ t }}</option>
+        </select>
+      </div>
 
-        <div class="field grow">
-        <label>Notes</label>
-        <textarea
-        rows="2"
-        [ngModel]="editNotes()"
-        (ngModelChange)="editNotes.set($event)"
-        placeholder="Add notes"></textarea>
-        </div>
-
-        <div class="actions">
-        <button class="btn btn-primary" (click)="saveEdit()">Save</button>
-        <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
-        </div>
-        </div>
-        </td>
-        </tr>
-        </tbody>
-    </table>
-
-    
-
-    <!-- Empty state -->
-    <div class="empty" *ngIf="filteredComplaints().length === 0">
-      No complaints found for the given criteria.
+      <div class="col-md-3">
+        <label class="form-label">Category</label>
+        <input type="text" formControlName="category" class="form-control" placeholder="Category">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Date From</label>
+        <input type="datetime-local" formControlName="submittedFrom" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Date To</label>
+        <input type="datetime-local" formControlName="submittedTo" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Keyword Search</label>
+        <input type="text" formControlName="q" class="form-control" placeholder="Description...">
+      </div>
     </div>
-  </section>
+
+    <div class="actions mt-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Search</button>
+      <button type="button" class="btn btn-secondary" (click)="clearFilters()" [disabled]="isLoading()">Clear</button>
+    </div>
+  </form>
+
+  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Results & Export -->
+  <div class="card p-3 shadow-sm" *ngIf="!isLoading() && totalElements() > 0">
+    <div class="d-flex justify-content-between mb-3 align-items-center">
+      <h5 class="mb-0">Results ({{ totalElements() }})</h5>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" (click)="exportCSV()">Export CSV</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="exportPDF()">Export PDF</button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Type / Category</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of complaints()">
+            <td><strong>{{ c.complaintId }}</strong></td>
+            <td>
+              <div>ID: {{ c.customerId }}</div>
+            </td>
+            <td>
+              <div class="badge bg-secondary mb-1">{{ c.complaintType }}</div>
+              <div class="small text-muted">{{ c.category || '-' }}</div>
+            </td>
+            <td>{{ c.dateSubmitted | date:'short' }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                  'bg-success': c.status === 'RESOLVED',
+                  'bg-warning text-dark': c.status === 'IN_PROGRESS',
+                  'bg-danger': c.status === 'OPEN',
+                  'bg-dark': c.status === 'CLOSED'
+                }">
+                {{ c.status }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="c.assignedToUserId">{{ c.assignedToUserName || c.assignedToUserId }}</span>
+              <span *ngIf="!c.assignedToUserId" class="text-muted fst-italic">Unassigned</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-primary" (click)="viewDetails(c.complaintId)">View</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div  class="d-flex justify-content-between align-items-center mt-3">
+      <span class="text-muted small">Page {{ currentPage() + 1 }} of {{ totalPages() }}</span>
+      <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="form-select form-select-sm"
+          style="width: auto;">
+          <option *ngFor="let size of availablePageSizes" [value]="size">{{ size }}</option>
+        </select>
+      <div>
+        <button class="btn btn-sm btn-outline-secondary me-1" [disabled]="currentPage() === 0"
+          (click)="onPageChange(currentPage() - 1)">
+          Previous
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" [disabled]="currentPage() === totalPages() - 1"
+          (click)="onPageChange(currentPage() + 1)">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="selectedComplaint()" class="modal d-block show" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Complaint #{{ selectedComplaint()?.complaintId }}</h5>
+          <button type="button" class="btn-close" (click)="closeDetails()"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="isLoadingDetails()" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoadingDetails() && selectedComplaint() as d" class="container-fluid">
+            <!-- Status Row -->
+            
+<!-- Status Row -->
+<div class="row mb-3 align-items-center">
+  <div class="col-md-6">
+    <strong>Status:</strong>
+    <span
+      class="badge ms-2 fs-6"
+      [ngClass]="{
+        'bg-success': d.status === 'RESOLVED',
+        'bg-warning text-dark': d.status === 'IN_PROGRESS',
+        'bg-danger': d.status === 'OPEN',
+        'bg-dark': d.status === 'CLOSED'
+      }"
+      >{{ d.status }}</span
+    >
+
+    <!-- Change status controls -->
+    <div class="d-inline-flex align-items-center gap-2 ms-3">
+      <!-- Small select for status -->
+      <!-- If you don't have FormsModule, see the alternative below -->
+      <select
+        class="form-select form-select-sm w-auto"
+        [ngModel]="statusDraft()"
+        (ngModelChange)="statusDraft.set($event)"
+      >
+        <option *ngFor="let s of statuses" [ngValue]="s">{{ s }}</option>
+      </select>
+
+      <button
+        class="btn btn-sm btn-primary"
+        [disabled]="
+          isUpdatingStatus() ||
+          !statusDraft() ||
+          statusDraft() === d.status
+        "
+        (click)="updateStatus()"
+      >
+        <span *ngIf="!isUpdatingStatus()">Change</span>
+        <span *ngIf="isUpdatingStatus()">
+          <span
+            class="spinner-border spinner-border-sm me-1"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Saving...
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <div class="col-md-6 text-end text-muted">
+    <small>Submitted: {{ d.dateSubmitted | date: 'medium' }}</small>
+  </div>
+</div>
+
+
+            <!-- Core Details -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <h6>Type & Category</h6>
+                <p class="mb-0">{{ d.complaintType }}</p>
+                <p class="text-muted small">{{ d.category }}</p>
+              </div>
+              <div class="col-md-6">
+                <h6>Assignment</h6>
+                <p class="mb-0" *ngIf="d.assignedToUserName">Assigned to: {{ d.assignedToUserName }}</p>
+                <p class="mb-0 text-muted fst-italic" *ngIf="!d.assignedToUserName">Unassigned</p>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="card bg-light mb-3">
+              <div class="card-body">
+                <h6 class="card-title">Description</h6>
+                <p class="card-text">{{ d.description }}</p>
+              </div>
+            </div>
+
+            <!-- Contact Info -->
+            <h6>Contact Preferences</h6>
+            <ul class="list-group list-group-flush mb-3">
+              <li class="list-group-item">Method: {{ d.preferredContactMethod }}</li>
+              <li class="list-group-item" *ngIf="d.contactEmail">Email: {{ d.contactEmail }}</li>
+              <li class="list-group-item" *ngIf="d.contactPhone">Phone: {{ d.contactPhone }}</li>
+            </ul>
+
+            <!-- Admin Notes -->
+            <div *ngIf="d.notes" class="alert alert-info">
+  <strong>Note from Support:</strong>
+  <pre class="mb-0">{{ d.notes }}</pre>
+</div>
+
+
+<!-- Add New Note -->
+<div class="card border-secondary mt-3">
+  <div class="card-body">
+    <h6 class="card-title">Add Note</h6>
+
+
+    <textarea
+      class="form-control mb-3"
+      rows="3"
+      placeholder="Enter internal note..."
+      [value]="addNoteText()"
+      (input)="addNoteText.set($any($event.target).value)"
+      [disabled]="isAddingNote()"
+    ></textarea>
+
+
+    <div class="text-end">
+      <button
+        class="btn btn-sm btn-outline-primary"
+        (click)="addNote()"
+        [disabled]="isAddingNote() || !addNoteText()?.trim()"
+      >
+        <span *ngIf="!isAddingNote()">Add Note</span>
+        <span *ngIf="isAddingNote()">
+          <span
+            class="spinner-border spinner-border-sm me-1"
+            role="status"
+          ></span>
+          Saving...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+        
+<div class="modal-footer">
+
+  <button
+    *ngIf="selectedComplaint() && !selectedComplaint()?.assignedToUserId"
+    class="btn btn-success"
+    [disabled]="isUpdatingStatus()"
+    (click)="acceptComplaint()"
+  >
+    <span *ngIf="!isUpdatingStatus()">Accept</span>
+    <span *ngIf="isUpdatingStatus()">
+      <span class="spinner-border spinner-border-sm me-1"></span>
+      Processing...
+    </span>
+  </button>
+
+  <button type="button" class="btn btn-secondary" (click)="closeDetails()">Close</button>
+</div>
+
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading() && totalElements() === 0 && !errorMessage()" class="alert alert-info mt-3">
+    No results found. Try adjusting filters.
+  </div>
 </div>

@@ -23,6 +23,8 @@ import { BillSummaryComponent } from './components/bill-summary/bill-summary.com
 import { AdminAddBillComponent } from './components/admin-add-bill/admin-add-bill.component';
 import { AdminViewBillComponent } from './components/admin-view-bill/admin-view-bill.component';
 import { RegisterSmeComponent } from './register-sme/register-sme.component';
+import { CustomerListComponent } from './components/customer-list/customer-list.component';
+import { SmeListComponent } from './components/sme-list/sme-list.component';
 
 /** ---- Placeholders (standalone) for demo ---- */
 // @Component({ standalone: true, template: `<h1>Home</h1>` })
@@ -90,6 +92,7 @@ export const routes: Routes = [
   { path: 'admin/register-sme', component: RegisterSmeComponent},
     { path: 'admin/add-bill', component: AdminAddBillComponent },
     { path: 'admin/view-bill', component: AdminViewBillComponent },
+    { path: 'admin/list-customer', component: CustomerListComponent },
 
   // { path: 'admin/add-bill', component: AdminAddBillComponent },
   //   { path: 'admin/view-bill', component: AdminViewBillComponent }
@@ -98,6 +101,7 @@ export const routes: Routes = [
   { path: 'sme', component: SmeHomeComponent  },
   { path: 'sme/users', component: SmeUsersComponent },
   { path: 'sme/complaints', component: SmeComplaintsComponent},
+  { path: 'admin/smes', component: SmeListComponent },
 
   // Fallback (consider redirecting to a meaningful page or a 404 component)
   { path: '**', redirectTo: '' },

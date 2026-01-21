@@ -118,8 +118,12 @@
     </div>
 
     <!-- Pagination -->
-    <div *ngIf="totalPages() > 1" class="d-flex justify-content-between align-items-center mt-3">
+    <div  class="d-flex justify-content-between align-items-center mt-3">
       <span class="text-muted small">Page {{ currentPage() + 1 }} of {{ totalPages() }}</span>
+      <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="form-select form-select-sm"
+          style="width: auto;">
+          <option *ngFor="let size of availablePageSizes" [value]="size">{{ size }}</option>
+        </select>
       <div>
         <button class="btn btn-sm btn-outline-secondary me-1" [disabled]="currentPage() === 0"
           (click)="onPageChange(currentPage() - 1)">
@@ -129,6 +133,185 @@
           (click)="onPageChange(currentPage() + 1)">
           Next
         </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="selectedComplaint()" class="modal d-block show" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Complaint #{{ selectedComplaint()?.complaintId }}</h5>
+          <button type="button" class="btn-close" (click)="closeDetails()"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="isLoadingDetails()" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoadingDetails() && selectedComplaint() as d" class="container-fluid">
+            <!-- Status Row -->
+            <<!-- Status Row -->
+<div class="row mb-3 align-items-center">
+  <div class="col-md-6">
+    <strong>Status:</strong>
+    <span
+      class="badge ms-2 fs-6"
+      [ngClass]="{
+        'bg-success': d.status === 'RESOLVED',
+        'bg-warning text-dark': d.status === 'IN_PROGRESS',
+        'bg-danger': d.status === 'OPEN',
+        'bg-dark': d.status === 'CLOSED'
+      }"
+      >{{ d.status }}</span
+    >
+
+    <!-- Change status controls -->
+    <div class="d-inline-flex align-items-center gap-2 ms-3">
+      <!-- Small select for status -->
+      <!-- If you don't have FormsModule, see the alternative below -->
+      <select
+        class="form-select form-select-sm w-auto"
+        [ngModel]="statusDraft()"
+        (ngModelChange)="statusDraft.set($event)"
+      >
+        <option *ngFor="let s of statuses" [ngValue]="s">{{ s }}</option>
+      </select>
+
+      <button
+        class="btn btn-sm btn-primary"
+        [disabled]="
+          isUpdatingStatus() ||
+          !statusDraft() ||
+          statusDraft() === d.status
+        "
+        (click)="updateStatus()"
+      >
+        <span *ngIf="!isUpdatingStatus()">Change</span>
+        <span *ngIf="isUpdatingStatus()">
+          <span
+            class="spinner-border spinner-border-sm me-1"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Saving...
+        </span>
+      </button>
+    </div>
+  </div>
+
+
+            <!-- Core Details -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <h6>Type & Category</h6>
+                <p class="mb-0">{{ d.complaintType }}</p>
+                <p class="text-muted small">{{ d.category }}</p>
+              </div>
+<!-- Assignment -->
+            <div class="col-md-6">
+              <h6>Assignment</h6>
+              <p class="mb-1" *ngIf="d.assignedToUserName">
+                Assigned to: <strong>{{ d.assignedToUserName }}</strong>
+                <span *ngIf="d.assignedToUserId" class="text-muted">(#{{ d.assignedToUserId }})</span>
+              </p>
+              <p class="mb-1 text-muted fst-italic" *ngIf="!d.assignedToUserName">Unassigned</p>
+
+              <!-- Simple userId input + Assign button (no external list dependency) -->
+              <div class="input-group input-group-sm w-auto mt-2">
+                <span class="input-group-text">User ID</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  [value]="assignedUserId() ?? ''"
+                  (input)="assignedUserId.set(+$any($event.target).value || null)"
+                  [disabled]="isAssigning()"
+                  min="1"
+                />
+                <button
+                  class="btn btn-outline-success"
+                  (click)="assignComplaint()"
+                  [disabled]="
+                    isAssigning() ||
+                    !assignedUserId() ||
+                    assignedUserId() === d.assignedToUserId
+                  "
+                >
+                  <span *ngIf="!isAssigning()">Assign</span>
+                  <span *ngIf="isAssigning()">
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    Assigning...
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+
+            <!-- Description -->
+            <div class="card bg-light mb-3">
+              <div class="card-body">
+                <h6 class="card-title">Description</h6>
+                <p class="card-text">{{ d.description }}</p>
+              </div>
+            </div>
+
+            <!-- Contact Info -->
+            <h6>Contact Preferences</h6>
+            <ul class="list-group list-group-flush mb-3">
+              <li class="list-group-item">Method: {{ d.preferredContactMethod }}</li>
+              <li class="list-group-item" *ngIf="d.contactEmail">Email: {{ d.contactEmail }}</li>
+              <li class="list-group-item" *ngIf="d.contactPhone">Phone: {{ d.contactPhone }}</li>
+            </ul>
+
+            <!-- Admin Notes -->
+            
+<!-- Existing Notes -->
+<div *ngIf="d.notes" class="alert alert-info">
+  <strong>Note from Support:</strong>
+  <pre class="mb-0">{{ d.notes }}</pre>
+</div>
+
+<!-- Add New Note -->
+<div class="card border-secondary mt-3">
+  <div class="card-body">
+    <h6 class="card-title">Add Note</h6>
+
+    <textarea
+      class="form-control mb-3"
+      rows="3"
+      placeholder="Enter internal note..."
+      [value]="addNoteText()"
+      (input)="addNoteText.set($any($event.target).value)"
+      [disabled]="isAddingNote()"
+    ></textarea>
+
+    <div class="text-end">
+      <button
+        class="btn btn-sm btn-outline-primary"
+        (click)="addNote()"
+        [disabled]="isAddingNote() || !addNoteText()?.trim()"
+      >
+        <span *ngIf="!isAddingNote()">Add Note</span>
+        <span *ngIf="isAddingNote()">
+          <span
+            class="spinner-border spinner-border-sm me-1"
+            role="status"
+          ></span>
+          Saving...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDetails()">Close</button>
+        </div>
       </div>
     </div>
   </div>

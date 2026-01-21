@@ -1,52 +1,130 @@
 
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { BillsService } from '../../services/common/bills/bills.service';
+
+import {
+  BillsService,
+  BillViewModel,
+  BillListFilters,
+  Page,
+  BillDTO,
+} from '../../services/apis/bills/bills-list.service';
 
 @Component({
-  selector: 'app-view-bills',
+  selector: 'app-customer-bills',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './view-bills.component.html',
-  styleUrls: ['./view-bills.component.css']
+  styleUrls: ['./view-bills.component.css'],
 })
-export class ViewBillsComponent {
+export class ViewBillsComponent implements OnInit {
+  // ---- Filters (similar to complaint) ----
+  searchId = '';                    // billId
+  searchBillingPeriod = '';         // e.g. '2025-12'
+  searchPaymentStatus: string = ''; // e.g. 'PAID' | 'UNPAID' (depends on your enum)
+  dueDateFrom = '';                 // YYYY-MM-DD
+  dueDateTo = '';                   // YYYY-MM-DD
 
-  constructor(
-    public billsService: BillsService,
-    private router: Router
-  ) {}
+  // ---- Pagination ----
+  pageSize = 10;
+  availablePageSizes = [5, 10, 20, 50];
 
-  /**
-   * Optional: you can remove this if you don't show a footer total anymore.
-   * Keeping it here in case you want to show totals elsewhere later.
-   */
-  get totalPayable(): number {
-    return this.billsService.bills
-      .filter(b => b.paymentStatus !== 'Paid')
-      .reduce((sum, b) => sum + b.dueAmount, 0);
+  // ---- State ----
+  totalElements = signal<number>(0);
+  totalPages = signal<number>(0);
+  currentPage = signal<number>(0);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
+
+  constructor(public billsService: BillsService) {}
+
+  ngOnInit(): void {
+    this.fetchBills();
   }
 
-  /**
-   * When user clicks Pay Now for a bill:
-   *  - Clear other selections
-   *  - Mark ONLY this bill as selected
-   *  - Continue to bill summary page
-   */
-  payBill(bill: any) {
-    // Clear existing selections
-    this.billsService.bills.forEach(b => (b.selected = false));
+  // ---- Core data loading ----
+  fetchBills(page: number = 0): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-    // Select only this bill
-    bill.selected = true;
+    const filters: BillListFilters = {
+      billId: this.searchId ? Number(this.searchId) : undefined,
+      billingPeriod: this.searchBillingPeriod || undefined,
+      paymentStatus: this.searchPaymentStatus || undefined,
+      dueDateFrom: this.dueDateFrom || undefined,
+      dueDateTo: this.dueDateTo || undefined,
+    };
 
-    // If you prefer, you can also store the selected bill explicitly:
-    // this.billsService.selectedBill = bill;
-
-    // Navigate to summary for further processing
-    this.router.navigate(['/bill-summary']);
+    this.billsService
+      .refreshBillsList(page, this.pageSize, filters)
+      .subscribe({
+        next: (pageData: Page<BillDTO>) => {
+          this.totalElements.set(pageData.totalElements);
+          this.totalPages.set(pageData.totalPages);
+          this.currentPage.set(pageData.number);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error('Error fetching bills', err);
+          this.isLoading.set(false);
+          this.errorMessage.set('Failed to load bills. Please try again.');
+        },
+      });
   }
 
+  // ---- Actions ----
+  payBill(bill: BillViewModel): void {
+    // Typically the amount is dueAmount; adjust if your payment flow differs.
+    const amount = bill.dueAmount ?? 0;
+    if (!bill.billNumber || amount <= 0) {
+      alert('Invalid bill or amount.');
+      return;
+    }
+
+    // Minimal payload; extend with method/ref/details as needed.
+    this.isLoading.set(true);
+    this.billsService
+      .createPayment({
+        billId: bill.billNumber,
+        amount,
+        paymentMethod: 'UPI',
+      })
+      .subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          // refresh current page after successful payment
+          this.fetchBills(this.currentPage());
+        },
+        error: (err) => {
+          console.error('Payment failed', err);
+          this.isLoading.set(false);
+          alert('Payment failed. Please try again.');
+        },
+      });
+  }
+
+  // ---- Pagination / filters handlers ----
+  onPageSizeChange(): void {
+    this.fetchBills(0);
+  }
+
+  onSearch(): void {
+    this.fetchBills(0);
+  }
+
+  onPageChange(newPage: number): void {
+    if (newPage >= 0 && newPage < this.totalPages()) {
+      this.fetchBills(newPage);
+    }
+  }
+
+  resetFilters(): void {
+    this.searchId = '';
+    this.searchBillingPeriod = '';
+    this.searchPaymentStatus = '';
+    this.dueDateFrom = '';
+    this.dueDateTo = '';
+    this.fetchBills(0);
+  }
 }

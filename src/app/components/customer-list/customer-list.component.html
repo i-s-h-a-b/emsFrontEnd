@@ -1,0 +1,157 @@
+<div class="customer-list-container">
+  <header class="page-header">
+    <h1>Customer Management</h1>
+    <p class="subtitle">View and filter customer records</p>
+  </header>
+
+  <!-- Filters Section -->
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="filter-group">
+        <label for="electricalSection">Electrical Section</label>
+        <select 
+          id="electricalSection" 
+          [(ngModel)]="selectedElectricalSection" 
+          (change)="onFilterChange()"
+          class="filter-select">
+          <option value="">All Sections</option>
+          <option *ngFor="let section of electricalSections" [value]="section">
+            {{ section.replace('SECTION_', 'Section ') }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="customerType">Customer Type</label>
+        <select 
+          id="customerType" 
+          [(ngModel)]="selectedCustomerType" 
+          (change)="onFilterChange()"
+          class="filter-select">
+          <option value="">All Types</option>
+          <option *ngFor="let type of customerTypes" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button 
+          class="btn-clear" 
+          (click)="clearFilters()"
+          [disabled]="!selectedElectricalSection && !selectedCustomerType">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="results-info">
+      <span class="total-count">
+        <strong>{{ totalElements }}</strong> customer{{ totalElements !== 1 ? 's' : '' }} found
+      </span>
+      <div class="page-size-control">
+        <label for="pageSize">Show:</label>
+        <select 
+          id="pageSize" 
+          [(ngModel)]="pageSize" 
+          (change)="onPageSizeChange()"
+          class="page-size-select">
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="50">50</option>
+        </select>
+        <span>per page</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading customers...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="loadCustomers()">Retry</button>
+  </div>
+
+  <!-- Customer Table -->
+  <div *ngIf="!loading && !error" class="table-container">
+    <table class="customer-table">
+      <thead>
+        <tr>
+          <th>Customer ID</th>
+          <th>Consumer Number</th>
+          <th>Name</th>
+          <th>Mobile</th>
+          <th>Address</th>
+          <th>Section</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let customer of customers">
+          <td class="cell-id">{{ customer.refinedCustomerId }}</td>
+          <td>{{ customer.cousumerNumber || 'N/A' }}</td>
+          <td class="cell-name">{{ customer.fname }} {{ customer.lname }}</td>
+          <td>{{ customer.mobileNumber }}</td>
+          <td class="cell-address">{{ customer.address }}</td>
+          <td>
+            <span class="badge badge-section">
+              {{ customer.electricalSection.replace('SECTION_', '') }}
+            </span>
+          </td>
+          <td>
+            <span [class]="'badge badge-' + (customer.customerType === 'RESIDENTIAL' ? 'residential' : 'commercial')">
+              {{ customer.customerType }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="customers.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>No customers found</p>
+      <small>Try adjusting your filters</small>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && !error && totalPages > 0" class="pagination-container">
+    <div class="pagination-info">
+      Showing {{ currentPage * pageSize + 1 }} to {{ Math.min((currentPage + 1) * pageSize, totalElements) }} of {{ totalElements }}
+    </div>
+    
+    <div class="pagination-controls">
+      <button 
+        class="btn-page" 
+        (click)="previousPage()" 
+        [disabled]="currentPage === 0">
+        ← Previous
+      </button>
+      
+      <div class="page-numbers">
+        <button 
+          *ngFor="let page of pageNumbers"
+          class="btn-page-number"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)">
+          {{ page + 1 }}
+        </button>
+      </div>
+      
+      <button 
+        class="btn-page" 
+        (click)="nextPage()" 
+        [disabled]="currentPage === totalPages - 1">
+        Next →
+      </button>
+    </div>
+  </div>
+</div>
