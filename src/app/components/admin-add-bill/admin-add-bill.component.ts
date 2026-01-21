@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { AdminBillsService, CreateBillRequest, BillDTO } from '../../services/apis/bills/admin-bills.service';
+import { AdminBillsService, CreateBillRequest, BillDTO, ConnectionType, ConnectionStatus } from '../../services/apis/bills/admin-bills.service';
 
 @Component({
   selector: 'app-admin-add-bill',
@@ -28,10 +28,10 @@ export class AdminAddBillComponent {
       billingPeriod: ['', [Validators.required, Validators.pattern(/^\d{4}-\d{2}$/)]],
       billDate: ['', Validators.required],
       dueDate: ['', Validators.required],
-      disconnectionDate: [''],
       billAmount: ['', [Validators.required, Validators.min(0.01)]],
-      lateFee: [0, [Validators.min(0)]],
-      status: ['UNPAID', Validators.required]
+      lateFee: [0, [Validators.required, Validators.min(0)]],
+      connectionType: ['DOMESTIC', Validators.required],
+      connectionStatus: ['CONNECTED', Validators.required]
     });
   }
 
@@ -71,10 +71,10 @@ export class AdminAddBillComponent {
         billingPeriod: this.billForm.get('billingPeriod')?.value ?? '',
         billDate: billDate,
         dueDate: dueDate,
-        disconnectionDate: this.billForm.get('disconnectionDate')?.value || undefined,
         billAmount: Number(this.billForm.get('billAmount')?.value ?? 0),
         lateFee: Number(this.billForm.get('lateFee')?.value ?? 0),
-        status: this.billForm.get('status')?.value ?? 'UNPAID'
+        connectionType: (this.billForm.get('connectionType')?.value ?? 'DOMESTIC') as ConnectionType,
+        connectionStatus: (this.billForm.get('connectionStatus')?.value ?? 'CONNECTED') as ConnectionStatus
       };
 
       // Call the API
@@ -85,7 +85,11 @@ export class AdminAddBillComponent {
       this.isLoading.set(false);
 
       // Reset form
-      this.billForm.reset({ lateFee: 0, status: 'UNPAID' });
+      this.billForm.reset({
+        lateFee: 0,
+        connectionType: 'DOMESTIC',
+        connectionStatus: 'CONNECTED'
+      });
 
     } catch (err: any) {
       this.isLoading.set(false);

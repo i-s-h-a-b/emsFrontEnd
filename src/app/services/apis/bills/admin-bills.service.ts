@@ -1,20 +1,30 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environment';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
+
+/**
+ * Connection type enum
+ */
+export type ConnectionType = 'DOMESTIC' | 'COMMERCIAL';
+
+/**
+ * Connection status enum
+ */
+export type ConnectionStatus = 'CONNECTED' | 'DISCONNECTED';
 
 /**
  * Request payload for creating a bill
- * Matches the backend BillCreateRequest or similar DTO
+ * Matches the backend BillCreateRequest DTO
  */
 export interface CreateBillRequest {
-    billingPeriod: string;      // Format: 'YYYY-MM' (e.g., '2025-01')
-    billDate: string;           // ISO date string (e.g., '2025-01-15')
-    dueDate: string;            // ISO date string (e.g., '2025-01-30')
-    disconnectionDate?: string; // Optional ISO date string
-    billAmount: number;         // Total bill amount
-    lateFee?: number;           // Optional late fee amount
-    status?: string;            // Optional status (e.g., 'UNPAID', 'PAID')
+    billingPeriod: string;              // Format: 'YYYY-MM' (e.g., '2025-01')
+    billDate: string;                   // ISO date string (e.g., '2025-01-15')
+    dueDate: string;                    // ISO date string (e.g., '2025-01-30')
+    billAmount: number;                 // Total bill amount
+    lateFee: number;                    // Late fee amount (default: 0)
+    connectionType: ConnectionType;     // 'DOMESTIC' or 'COMMERCIAL'
+    connectionStatus: ConnectionStatus; // 'CONNECTED' or 'DISCONNECTED'
 }
 
 /**
@@ -61,42 +71,42 @@ export class AdminBillsService {
         return firstValueFrom(this.http.post<BillDTO>(url, billData));
     }
 
-    /**
-     * Optional: Get all bills for a specific customer (if backend supports it)
-     * Endpoint: GET /api/admin/customers/{customerId}/bills
-     * 
-     * @param customerId - The ID of the customer
-     * @returns Promise<BillDTO[]> - List of bills for the customer
-     */
-    async getCustomerBills(customerId: number): Promise<BillDTO[]> {
-        const url = `${this.baseUrl}api/admin/customers/${customerId}/bills`;
-        return firstValueFrom(this.http.get<BillDTO[]>(url));
-    }
+    // /**
+    //  * Optional: Get all bills for a specific customer (if backend supports it)
+    //  * Endpoint: GET /api/admin/customers/{customerId}/bills
+    //  * 
+    //  * @param customerId - The ID of the customer
+    //  * @returns Promise<BillDTO[]> - List of bills for the customer
+    //  */
+    // async getCustomerBills(customerId: number): Promise<BillDTO[]> {
+    //     const url = `${this.baseUrl}api/admin/customers/${customerId}/bills`;
+    //     return firstValueFrom(this.http.get<BillDTO[]>(url));
+    // }
 
-    /**
-     * Optional: Update a bill (if backend supports it)
-     * Endpoint: PUT /api/admin/customers/{customerId}/bills/{billId}
-     * 
-     * @param customerId - The ID of the customer
-     * @param billId - The ID of the bill to update
-     * @param billData - The updated bill data
-     * @returns Promise<BillDTO> - The updated bill details
-     */
-    async updateBill(customerId: number, billId: number, billData: Partial<CreateBillRequest>): Promise<BillDTO> {
-        const url = `${this.baseUrl}api/admin/customers/${customerId}/bills/${billId}`;
-        return firstValueFrom(this.http.put<BillDTO>(url, billData));
-    }
+    // /**
+    //  * Optional: Update a bill (if backend supports it)
+    //  * Endpoint: PUT /api/admin/customers/{customerId}/bills/{billId}
+    //  * 
+    //  * @param customerId - The ID of the customer
+    //  * @param billId - The ID of the bill to update
+    //  * @param billData - The updated bill data
+    //  * @returns Promise<BillDTO> - The updated bill details
+    //  */
+    // async updateBill(customerId: number, billId: number, billData: Partial<CreateBillRequest>): Promise<BillDTO> {
+    //     const url = `${this.baseUrl}api/admin/customers/${customerId}/bills/${billId}`;
+    //     return firstValueFrom(this.http.put<BillDTO>(url, billData));
+    // }
 
-    /**
-     * Optional: Delete a bill (if backend supports it)
-     * Endpoint: DELETE /api/admin/customers/{customerId}/bills/{billId}
-     * 
-     * @param customerId - The ID of the customer
-     * @param billId - The ID of the bill to delete
-     * @returns Promise<void>
-     */
-    async deleteBill(customerId: number, billId: number): Promise<void> {
-        const url = `${this.baseUrl}api/admin/customers/${customerId}/bills/${billId}`;
-        return firstValueFrom(this.http.delete<void>(url));
-    }
+    // /**
+    //  * Optional: Delete a bill (if backend supports it)
+    //  * Endpoint: DELETE /api/admin/customers/{customerId}/bills/{billId}
+    //  * 
+    //  * @param customerId - The ID of the customer
+    //  * @param billId - The ID of the bill to delete
+    //  * @returns Promise<void>
+    //  */
+    // async deleteBill(customerId: number, billId: number): Promise<void> {
+    //     const url = `${this.baseUrl}api/admin/customers/${customerId}/bills/${billId}`;
+    //     return firstValueFrom(this.http.delete<void>(url));
+    // }
 }
