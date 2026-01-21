@@ -1,81 +1,61 @@
-<div class="body">
-  <div class="register-container">
-    <h2>SME Registration</h2>
-    <form #form="ngForm">
-      
-      <!-- Full Name -->
-      <label for="fullName">Full Name<span class="error">*</span></label>
-      <input type="text" [(ngModel)]="registerObj.fullName" #fname="ngModel"
-        id="fullName" name="fullName" required maxlength="50" pattern="^[a-zA-Z ]+$"
-        placeholder="Enter Full Name">
-      @if(fname.errors?.['required'] && fname.touched){
-        <span class="error">Full Name is required.</span>
-      }
-      @if(fname.errors?.['pattern']){
-        <span class="error">Name should contain only letters.</span>
-      }
+<div class="container mt-3">
+  <h2>Add SME</h2>
 
-      <!-- Email -->
-      <label for="email">Email<span class="error">*</span></label>
-      <input type="email" [(ngModel)]="registerObj.email" #email="ngModel"
-        id="email" name="email" required email placeholder="Enter Email">
-      @if(email.errors?.['required'] && email.touched){
-        <span class="error">Email is required.</span>
-      }
-      @if(email.errors?.['email']){
-        <span class="error">Incorrect email format.</span>
-      }
+  <form *ngIf="!createdSme()" [formGroup]="form" (ngSubmit)="submit()" class="card p-3 shadow-sm">
 
-      <!-- Mobile Number -->
-      <label for="mobileNumber">Mobile Number<span class="error">*</span></label>
-      <input type="text" [(ngModel)]="registerObj.mobileNumber" #mobile="ngModel"
-        id="mobileNumber" name="mobileNumber" required pattern="^[0-9]{10}$"
-        placeholder="Enter 10-digit Mobile Number">
-      @if(mobile.errors?.['required'] && mobile.touched){
-        <span class="error">Mobile number is required.</span>
-      }
-      @if(mobile.errors?.['pattern']){
-        <span class="error">Mobile number is invalid.</span>
-      }
-
-      <!-- User ID -->
-      <label for="userId">User ID<span class="error">*</span></label>
-      <input type="text" [(ngModel)]="registerObj.userId" #uid="ngModel"
-        id="userId" name="userId" required minlength="5" maxlength="20"
-        placeholder="Enter User ID">
-      @if(uid.errors?.['required'] && uid.touched){
-        <span class="error">User ID is required.</span>
-      }
-      @if(uid.errors?.['minlength']){
-        <span class="error">User ID must be at least 5 characters.</span>
-      }
-
-      <!-- Password -->
-      <label for="password">Password<span class="error">*</span></label>
-      <input type="password" [(ngModel)]="registerObj.password" #pass="ngModel"
-        id="password" name="password" required
-        pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,}$"
-        placeholder="Enter Password">
-      @if(pass.errors?.['required'] && pass.touched){
-        <span class="error">Password is required.</span>
-      }
-      @if(pass.errors?.['pattern']){
-        <span class="error">Password must contain uppercase, lowercase, digit & special character.</span>
-      }
-
-      <!-- Confirm Password -->
-      <label for="confirmPassword">Confirm Password<span class="error">*</span></label>
-      <input type="password" [(ngModel)]="registerObj.confirmPassword" #cpass="ngModel"
-        id="confirmPassword" name="confirmPassword" required placeholder="Confirm Password">
-      @if(cpass.errors?.['required'] && cpass.touched){
-        <span class="error">Confirm Password is required.</span>
-      }
-
-      <button type="button" (click)="onRegister(form)">Register</button>
-    </form>
-
-    <div *ngIf="confirmationMessage" class="success-message">
-      {{ confirmationMessage }}
+    <div *ngIf="errorMessage()" class="alert alert-danger">
+      {{ errorMessage() }}
     </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>First Name *</label>
+        <input class="form-control" formControlName="fname">
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label>Last Name *</label>
+        <input class="form-control" formControlName="lname">
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label>Mobile Number *</label>
+      <input class="form-control" formControlName="mobileNumber">
+    </div>
+
+    <div class="mb-3">
+      <label>Email *</label>
+      <input class="form-control" formControlName="userEmail">
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Username *</label>
+        <input class="form-control" formControlName="username">
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label>Password *</label>
+        <input type="password" class="form-control" formControlName="password">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" [disabled]="isLoading() || form.invalid">
+      <span *ngIf="isLoading()" class="spinner-border spinner-border-sm me-2"></span>
+      Create SME
+    </button>
+
+    <button type="button" class="btn btn-secondary ms-2" (click)="reset()">Reset</button>
+  </form>
+
+  <!-- Success -->
+  <div *ngIf="createdSme()" class="card p-4 mt-3 text-center shadow-sm">
+    <h4 class="text-success">SME Created Successfully</h4>
+    <p><strong>Employee ID:</strong> {{ createdSme()?.employeeId }}</p>
+    <p><strong>Name:</strong> {{ createdSme()?.fname }} {{ createdSme()?.lname }}</p>
+    <p><strong>Email:</strong> {{ createdSme()?.userEmail }}</p>
+
+    <button class="btn btn-outline-primary mt-2" (click)="reset()">Add Another</button>
   </div>
 </div>
