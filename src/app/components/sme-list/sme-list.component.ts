@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminSmeService, SmeListingResponse } from '../../services/apis/adminSmeList/admin-sme.service';
+import { AdminSmeService, Sme, PageableResponse } from '../../services/common/customerList/admin-sme-list.service';
 
 @Component({
   selector: 'app-list-sme',
@@ -12,7 +12,7 @@ import { AdminSmeService, SmeListingResponse } from '../../services/apis/adminSm
 })
 export class ListSmeComponent implements OnInit {
 
-  smes = signal<SmeListingResponse[]>([]);
+  smes = signal<Sme[]>([]);
   loading = signal(false);
   errorMessage = signal<string | null>(null);
 
@@ -24,7 +24,7 @@ export class ListSmeComponent implements OnInit {
   // filter
   smeId?: number;
 
-  constructor(private adminSmeService: AdminSmeService) {}
+  constructor(private adminSmeService: AdminSmeService) { }
 
   ngOnInit(): void {
     this.loadSmes();
@@ -35,16 +35,16 @@ export class ListSmeComponent implements OnInit {
     this.errorMessage.set(null);
 
     this.adminSmeService.getSmes(
+      this.smeId,
       this.page(),
-      this.size,
-      this.smeId
+      this.size
     ).subscribe({
-      next: (res) => {
+      next: (res: PageableResponse<Sme>) => {
         this.smes.set(res.content);
         this.totalPages.set(res.totalPages);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(err);
         this.errorMessage.set('Failed to load SMEs');
         this.loading.set(false);

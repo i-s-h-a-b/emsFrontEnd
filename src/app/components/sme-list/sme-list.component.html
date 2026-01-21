@@ -25,8 +25,7 @@
   </div>
 
   <!-- Table -->
-  <table *ngIf="!loading() && smes().length"
-         class="table table-bordered table-hover shadow-sm">
+  <table *ngIf="!loading() && smes().length" class="table table-bordered table-hover shadow-sm">
 
     <thead class="table-light">
       <tr>
@@ -43,24 +42,20 @@
         <td>{{ sme.smeId }}</td>
         <td>{{ sme.fname }} {{ sme.lname }}</td>
         <td>{{ sme.mobileNumber }}</td>
-        <td>{{ sme.userEmail }}</td>
+        <td>{{ sme.email }}</td>
         <td>{{ sme.userId }}</td>
       </tr>
     </tbody>
   </table>
 
   <!-- Empty -->
-  <div *ngIf="!loading() && smes().length === 0"
-       class="alert alert-info">
+  <div *ngIf="!loading() && smes().length === 0" class="alert alert-info">
     No SMEs found.
   </div>
 
   <!-- Pagination -->
-  <div class="d-flex justify-content-between mt-3"
-       *ngIf="totalPages() > 1">
-    <button class="btn btn-outline-secondary"
-            (click)="prev()"
-            [disabled]="page() === 0">
+  <div class="d-flex justify-content-between mt-3" *ngIf="totalPages() > 1">
+    <button class="btn btn-outline-secondary" (click)="prev()" [disabled]="page() === 0">
       Previous
     </button>
 
@@ -68,9 +63,7 @@
       Page {{ page() + 1 }} of {{ totalPages() }}
     </span>
 
-    <button class="btn btn-outline-secondary"
-            (click)="next()"
-            [disabled]="page() + 1 >= totalPages()">
+    <button class="btn btn-outline-secondary" (click)="next()" [disabled]="page() + 1 >= totalPages()">
       Next
     </button>
   </div>
