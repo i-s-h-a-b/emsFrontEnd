@@ -1,133 +1,176 @@
+<div class="container mt-5 mb-5">
+  <div class="card shadow-lg p-4">
+    <h2 class="text-center mb-4">Create Customer Account</h2>
 
-<div class="register-wrapper">
-  <div class="card register-card">
-    <h2 class="text-center">Create Account</h2>
-    <form #form="ngForm">
-     
+    <form #form="ngForm" (ngSubmit)="onRegister(form)">
+
       <!-- Row 1: Username & Full Names -->
-      <div class="form-row">
-        <div class="form-group half-width">
-          <label>Username <span class="text-danger">*</span></label>
-          <input type="text" [(ngModel)]="registerObj.username" #consumer="ngModel"
-            name="username" required placeholder="Username">
-          @if(consumer.errors?.['required'] && consumer.touched){
-            <div class="error-msg">Username is required.</div>
-          }
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label class="form-label">Username <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="registerObj.username" #username="ngModel" name="username"
+            required minlength="3" placeholder="Username" (blur)="checkUsername()">
+          <div *ngIf="username.invalid && (username.dirty || username.touched)" class="text-danger small">
+            <div *ngIf="username.errors?.['required']">Username is required.</div>
+            <div *ngIf="username.errors?.['minlength']">Username must be at least 3 characters.</div>
+          </div>
+          <div *ngIf="usernameTaken" class="text-danger small">
+            Username is already taken.
+          </div>
         </div>
-        
-        <div class="form-group half-width">
-          <label>First Name <span class="text-danger">*</span></label>
-          <input type="text" [(ngModel)]="registerObj.fname" #fname="ngModel"
-            name="fname" required maxlength="50" pattern="^[a-zA-Z ]+$" placeholder="First Name">
-          @if(fname.errors?.['required'] && fname.touched){
-            <div class="error-msg">First Name is required.</div>
-          }
-        </div>
-      </div>
 
-      <div class="form-group">
-        <label>Last Name <span class="text-danger">*</span></label>
-        <input type="text" [(ngModel)]="registerObj.lname" #lname="ngModel"
-          name="lname" required maxlength="50" pattern="^[a-zA-Z ]+$" placeholder="Last Name">
-        @if(lname.errors?.['required'] && lname.touched){
-          <div class="error-msg">Last Name is required.</div>
-        }
+        <div class="col-md-4">
+          <label class="form-label">First Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="registerObj.fname" #fname="ngModel" name="fname" required
+            maxlength="50" pattern="^[a-zA-Z ]+$" placeholder="First Name">
+          <div *ngIf="fname.invalid && (fname.dirty || fname.touched)" class="text-danger small">
+            First Name is required (letters only).
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Last Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="registerObj.lname" #lname="ngModel" name="lname" required
+            maxlength="50" pattern="^[a-zA-Z ]+$" placeholder="Last Name">
+          <div *ngIf="lname.invalid && (lname.dirty || lname.touched)" class="text-danger small">
+            Last Name is required.
+          </div>
+        </div>
       </div>
 
       <!-- Address -->
-      <div class="form-group">
-        <label>Address <span class="text-danger">*</span></label>
-        <textarea [(ngModel)]="registerObj.address" #addr="ngModel"
-          name="address" required minlength="10" placeholder="Full Address"></textarea>
-        @if(addr.errors?.['required'] && addr.touched){
-          <div class="error-msg">Address is required.</div>
-        }
-      </div>
-
-      <!-- Contact Info -->
-      <div class="form-row">
-        <div class="form-group half-width">
-          <label>Email <span class="text-danger">*</span></label>
-          <input type="email" [(ngModel)]="registerObj.email" #email="ngModel"
-            name="email" required email placeholder="Email Address">
-          @if(email.errors?.['required'] && email.touched){
-            <div class="error-msg">Email is required.</div>
-          }
-        </div>
-
-        <div class="form-group half-width">
-          <label>Mobile <span class="text-danger">*</span></label>
-          <input type="text" [(ngModel)]="registerObj.mobileNumber" #mobile="ngModel"
-            name="mobileNumber" required pattern="^[7-9][0-9]{9}$" placeholder="10-digit Mobile">
-          @if(mobile.errors?.['required'] && mobile.touched){
-            <div class="error-msg">Mobile is required.</div>
-          }
+      <div class="mb-3">
+        <label class="form-label">Address <span class="text-danger">*</span></label>
+        <textarea class="form-control" rows="2" [(ngModel)]="registerObj.address" #addr="ngModel" name="address"
+          required minlength="5" placeholder="Full Address"></textarea>
+        <div *ngIf="addr.invalid && (addr.dirty || addr.touched)" class="text-danger small">
+          Address is required.
         </div>
       </div>
 
-      <!-- Customer Details -->
-      <div class="form-row">
-        <div class="form-group half-width">
-          <label>Customer Type <span class="text-danger">*</span></label>
-          <select [(ngModel)]="registerObj.customerType" name="customerType" required>
+      <!-- Row 2: Contact Info -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Email <span class="text-danger">*</span></label>
+          <input type="email" class="form-control" [(ngModel)]="registerObj.email" #email="ngModel" name="email"
+            required email placeholder="Email Address">
+          <div *ngIf="email.invalid && (email.dirty || email.touched)" class="text-danger small">
+            Valid Email is required.
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Mobile <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="registerObj.mobileNumber" #mobile="ngModel"
+            name="mobileNumber" required pattern="^[0-9]{10}$" placeholder="10-digit Mobile">
+          <div *ngIf="mobile.invalid && (mobile.dirty || mobile.touched)" class="text-danger small">
+            Valid 10-digit mobile number is required.
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Customer Details -->
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <label class="form-label">Customer Type <span class="text-danger">*</span></label>
+          <select class="form-select" [(ngModel)]="registerObj.customerType" name="customerType" required
+            #cType="ngModel">
             <option value="">Select Type</option>
-            <option value="Residential">Residential</option>
-            <option value="Commercial">Commercial</option>
-            
+            <!-- Enum: RESIDENTIAL, COMMERCIAL -->
+            <option value="RESIDENTIAL">Residential</option>
+            <option value="COMMERCIAL">Commercial</option>
           </select>
+          <div *ngIf="cType.invalid && (cType.dirty || cType.touched)" class="text-danger small">
+            Customer Type is required.
+          </div>
         </div>
 
-        <div class="form-group half-width">
-          <label>Section <span class="text-danger">*</span></label>
-          <select [(ngModel)]="registerObj.electricalSection" name="electricalSection" required>
+        <div class="col-md-4">
+          <label class="form-label">Section <span class="text-danger">*</span></label>
+          <select class="form-select" [(ngModel)]="registerObj.electricalSection" name="electricalSection" required
+            #eSec="ngModel">
             <option value="">Select Section</option>
-            <option value="East_Zone">East Zone</option>
-            <option value="West_Zone">West Zone</option>
-            <option value="North_Zone">North Zone</option>
-            <option value="South_Zone">South Zone</option>
+            <!-- Enum: OFFICE, REGION, EAST_ZONE, WEST_ZONE, NORTH_ZONE, SOUTH_ZONE -->
+            <option value="EAST_ZONE">East Zone</option>
+            <option value="WEST_ZONE">West Zone</option>
+            <option value="NORTH_ZONE">North Zone</option>
+            <option value="SOUTH_ZONE">South Zone</option>
+            <option value="OFFICE">Office</option>
+            <option value="REGION">Region</option>
           </select>
+          <div *ngIf="eSec.invalid && (eSec.dirty || eSec.touched)" class="text-danger small">
+            Section is required.
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Consumer Number <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="registerObj.consumerNumber" #consumerNum="ngModel"
+            name="consumerNumber" required pattern="^[0-9]{13}$" placeholder="13-digit Consumer Number">
+          <div *ngIf="consumerNum.invalid && (consumerNum.dirty || consumerNum.touched)" class="text-danger small">
+            13-digit Consumer Number is required.
+          </div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Consumer Number <span class="text-danger">*</span></label>
-        <input type="text" [(ngModel)]="registerObj.consumerNumber" #consumerNum="ngModel"
-          name="consumerNumber" required pattern="^[0-9]{13}$" placeholder="13-digit Consumer Number">
-        @if(consumerNum.errors?.['required'] && consumerNum.touched){
-          <div class="error-msg">Consumer Number is required.</div>
-        }
-      </div>
 
       <!-- Password -->
-      <div class="form-row">
-        <div class="form-group half-width">
-          <label>Password <span class="text-danger">*</span></label>
-          <input type="password" [(ngModel)]="registerObj.password" #pass="ngModel"
-            name="password" required pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,}$" placeholder="Password">
-          @if(pass.errors?.['pattern'] && pass.touched){
-            <div class="error-msg">Password too weak.</div>
-          }
+      <!-- Password -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label class="form-label">Password <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="registerObj.password"
+              #pass="ngModel" name="password" required
+              pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,}$"
+              placeholder="Min 8 chars, 1 upper, 1 lower, 1 digit, 1 special">
+            <button class="btn btn-outline-secondary" type="button" (click)="togglePassword()">
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          <div *ngIf="pass.invalid && (pass.dirty || pass.touched)" class="text-danger small mt-1">
+            <div *ngIf="pass.errors?.['required']">Password is required.</div>
+            <div *ngIf="pass.errors?.['pattern']">
+              Weak password: Must be at least 8 chars, include uppercase, lowercase, number & special symbol
+              (&#64;#$%^&+=).
+            </div>
+          </div>
         </div>
 
-        <div class="form-group half-width">
-          <label>Confirm <span class="text-danger">*</span></label>
-          <input type="password" [(ngModel)]="registerObj.confirmPassword" #cpass="ngModel"
-            name="confirmPassword" required placeholder="Confirm">
-          @if(cpass.invalid && cpass.touched){
-             <div class="error-msg">Required.</div>
-          }
+        <div class="col-md-6">
+          <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" [(ngModel)]="registerObj.confirmPassword" #cpass="ngModel"
+            name="confirmPassword" required placeholder="Confirm Password">
+          <div *ngIf="cpass.invalid && (cpass.dirty || cpass.touched)" class="text-danger small">
+            Confirmation is required.
+          </div>
+          <div
+            *ngIf="registerObj.password && registerObj.confirmPassword && registerObj.password !== registerObj.confirmPassword && cpass.touched"
+            class="text-danger small">
+            Passwords do not match.
+          </div>
         </div>
       </div>
 
-      <button type="button" (click)="onRegister(form)" class="btn btn-full">Register</button>
-    </form>
-    
-    <div class="footer-link">
-      <p>Already have an account? <a routerLink="/login">Login</a></p>
-    </div>
+      <div class="d-grid gap-2">
+        <button type="submit" [disabled]="form.invalid || isRegistering" class="btn btn-primary btn-lg">
+          <span *ngIf="isRegistering" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isRegistering ? 'Registering...' : 'Register' }}
+        </button>
+      </div>
 
-    <div *ngIf="confirmationMessage" class="alert alert-success mt-3">
-      {{ confirmationMessage }}
-    </div>
+      <div class="mt-3 text-center">
+        <p>Already have an account? <a routerLink="/login" class="text-decoration-none">Login</a></p>
+      </div>
+
+      <div *ngIf="generalErrorMessage" class="alert alert-danger mt-3">
+        {{ generalErrorMessage }}
+      </div>
+
+      <div *ngIf="confirmationMessage" class="alert alert-success mt-3">
+        {{ confirmationMessage }}
+      </div>
+
+    </form>
   </div>
 </div>
