@@ -11,37 +11,41 @@
       <div class="nav-left">
         @switch (role)
         {
-          @case ('CUSTOMER') {
-            <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-            <a class="nav-link" routerLink="/view-bills" routerLinkActive="active">Bills</a>
-            <a class="nav-link" routerLink="/complaints" routerLinkActive="active">Complaints</a>
-          }
+        @case ('CUSTOMER') {
+        <a class="nav-link" routerLink="/" routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        <a class="nav-link" routerLink="/view-bills" routerLinkActive="active">Bills</a>
+        <a class="nav-link" routerLink="/complaints" routerLinkActive="active">Complaints</a>
+        }
 
-          @case ('SME') {
-            <a class="nav-link" routerLink="/sme/complaints" routerLinkActive="active">Complaints</a>
-          }
+        @case ('SME') {
+        <a class="nav-link" routerLink="/sme/complaints" routerLinkActive="active">Complaints</a>
+        }
 
-          @case ('ADMIN') {
-            <a class="nav-link" routerLink="/admin/bills" routerLinkActive="active">Bills</a>
-            <a class="nav-link" routerLink="/admin/complaints" routerLinkActive="active">Complaints</a>
-          }
+        @case ('ADMIN') {
+        <a class="nav-link" routerLink="/admin/bills" routerLinkActive="active">Bills</a>
+        <a class="nav-link" routerLink="/admin/complaints" routerLinkActive="active">Complaints</a>
+        <a class="nav-link" routerLink="admin/list-customer" routerLinkActive="active">customers</a>
+        <a class="nav-link" routerLink="admin/smes" routerLinkActive="active">smes</a>
+        <a class="nav-link" routerLink="admin/add-sme" routerLinkActive="active">Add SME</a>
+        }
         }
       </div>
 
       <!-- Right side: auth -->
       <div class="nav-right">
         @if (!isLoggedIn) {
-          <a class="nav-link btn-login" routerLink="/login" routerLinkActive="active">Login</a>
-          <!-- <a class="nav-link btn-register" routerLink="/register" routerLinkActive="active">Register</a> -->
+        <a class="nav-link btn-login" routerLink="/login" routerLinkActive="active">Login</a>
+        <!-- <a class="nav-link btn-register" routerLink="/register" routerLinkActive="active">Register</a> -->
         } @else {
-          <div class="dropdown">
-            <button class="dropbtn">
-              <span class="user-icon">👤</span> {{usernameF()}}
-            </button>
-            <div class="dropdown-content">
-              <button (click)="logout()" routerLink="/home">Logout</button>
-            </div>
+        <div class="dropdown">
+          <button class="dropbtn">
+            <span class="user-icon">👤</span> {{usernameF()}}
+          </button>
+          <div class="dropdown-content">
+            <button (click)="logout()" routerLink="/home">Logout</button>
           </div>
+        </div>
         }
       </div>
     </div>

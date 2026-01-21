@@ -25,6 +25,7 @@ import { AdminViewBillComponent } from './components/admin-view-bill/admin-view-
 import { RegisterSmeComponent } from './register-sme/register-sme.component';
 import { CustomerListComponent } from './components/customer-list/customer-list.component';
 import { SmeListComponent } from './components/sme-list/sme-list.component';
+import { AddSmeComponent } from './components/add-sme/add-sme.component';
 
 /** ---- Placeholders (standalone) for demo ---- */
 // @Component({ standalone: true, template: `<h1>Home</h1>` })
@@ -93,6 +94,7 @@ export const routes: Routes = [
     { path: 'admin/add-bill', component: AdminAddBillComponent },
     { path: 'admin/view-bill', component: AdminViewBillComponent },
     { path: 'admin/list-customer', component: CustomerListComponent },
+    { path: 'admin/add-sme', component: AddSmeComponent },
 
   // { path: 'admin/add-bill', component: AdminAddBillComponent },
   //   { path: 'admin/view-bill', component: AdminViewBillComponent }

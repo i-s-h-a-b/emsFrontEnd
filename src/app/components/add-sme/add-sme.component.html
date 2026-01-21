@@ -1,0 +1,117 @@
+<div class="container mt-5 mb-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Add New SME</h2>
+
+        <form #form="ngForm" (ngSubmit)="onSubmit(form)">
+
+            <!-- Row 1: First Name & Last Name -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">First Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" [(ngModel)]="smeObj.fname" #fname="ngModel" name="fname"
+                        required maxlength="100" pattern="^[a-zA-Z ]+$" placeholder="First Name">
+                    <div *ngIf="fname.invalid && (fname.dirty || fname.touched)" class="text-danger small">
+                        First Name is required (letters only).
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" [(ngModel)]="smeObj.lname" #lname="ngModel" name="lname"
+                        required maxlength="100" pattern="^[a-zA-Z ]+$" placeholder="Last Name">
+                    <div *ngIf="lname.invalid && (lname.dirty || lname.touched)" class="text-danger small">
+                        Last Name is required (letters only).
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Mobile Number -->
+            <div class="mb-3">
+                <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="smeObj.mobileNumber" #mobile="ngModel"
+                    name="mobileNumber" required pattern="^[0-9]{10}$" maxlength="15"
+                    placeholder="10-digit Mobile Number">
+                <div *ngIf="mobile.invalid && (mobile.dirty || mobile.touched)" class="text-danger small">
+                    Valid 10-digit mobile number is required.
+                </div>
+            </div>
+
+            <!-- Row 3: Email & Username -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" [(ngModel)]="smeObj.userEmail" #email="ngModel"
+                        name="userEmail" required email placeholder="Email Address">
+                    <div *ngIf="email.invalid && (email.dirty || email.touched)" class="text-danger small">
+                        Valid Email is required.
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Username <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" [(ngModel)]="smeObj.username" #username="ngModel"
+                        name="username" required minlength="3" placeholder="Username">
+                    <div *ngIf="username.invalid && (username.dirty || username.touched)" class="text-danger small">
+                        <div *ngIf="username.errors?.['required']">Username is required.</div>
+                        <div *ngIf="username.errors?.['minlength']">Username must be at least 3 characters.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 4: Password & Confirm Password -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Password <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+                            [(ngModel)]="smeObj.password" #pass="ngModel" name="password" required
+                            pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[&#64;#$%^&+=])(?=\S+$).{8,}$"
+                            placeholder="Min 8 chars, 1 upper, 1 lower, 1 digit, 1 special">
+                        <button class="btn btn-outline-secondary" type="button" (click)="togglePassword()">
+                            {{ showPassword ? 'Hide' : 'Show' }}
+                        </button>
+                    </div>
+                    <div *ngIf="pass.invalid && (pass.dirty || pass.touched)" class="text-danger small mt-1">
+                        <div *ngIf="pass.errors?.['required']">Password is required.</div>
+                        <div *ngIf="pass.errors?.['pattern']">
+                            Weak password: Must be at least 8 chars, include uppercase, lowercase, number & special
+                            symbol (&#64;#$%^&+=).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                    <input type="password" class="form-control" [(ngModel)]="smeObj.confirmPassword" #cpass="ngModel"
+                        name="confirmPassword" required placeholder="Confirm Password">
+                    <div *ngIf="cpass.invalid && (cpass.dirty || cpass.touched)" class="text-danger small">
+                        Confirmation is required.
+                    </div>
+                    <div *ngIf="smeObj.password && smeObj.confirmPassword && smeObj.password !== smeObj.confirmPassword && cpass.touched"
+                        class="text-danger small">
+                        Passwords do not match.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid gap-2">
+                <button type="submit" [disabled]="form.invalid || isSubmitting" class="btn btn-primary btn-lg">
+                    <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                    {{ isSubmitting ? 'Creating SME...' : 'Add SME' }}
+                </button>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+                {{ errorMessage }}
+            </div>
+
+            <!-- Success Message -->
+            <div *ngIf="successMessage" class="alert alert-success mt-3">
+                {{ successMessage }}
+            </div>
+
+        </form>
+    </div>
+</div>
