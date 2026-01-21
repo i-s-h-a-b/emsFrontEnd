@@ -1,140 +1,77 @@
+<div class="container mt-3">
+  <h2>SME List</h2>
 
-<div class="sme-list-container">
-  <header class="page-header">
-    <h1>SME Management</h1>
-    <p class="subtitle">View and filter SME records</p>
-  </header>
-
-  <!-- Filters Section -->
-  <section class="filters-section">
-    <div class="filters-container">
-      <div class="filter-group">
-        <label for="smeId">SME ID</label>
-        <input
-          id="smeId"
-          type="number"
-          class="filter-input"
-          [(ngModel)]="smeIdInput"
-          (change)="onFilterChange()"
-          placeholder="Enter SME ID (optional)"
-          min="1"
-        />
+  <!-- Filter -->
+  <div class="card p-3 mb-3">
+    <div class="row align-items-end">
+      <div class="col-md-4">
+        <label>Filter by SME ID</label>
+        <input type="number" class="form-control" [(ngModel)]="smeId">
       </div>
-
-      <div class="filter-actions">
-        <button
-          class="btn-clear"
-          (click)="clearFilters()"
-          [disabled]="!smeIdInput"
-        >
-          Clear Filters
-        </button>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" (click)="search()">Search</button>
       </div>
     </div>
-
-    <!-- Results Info -->
-    <div class="results-info">
-      <span class="total-count">
-        <strong>{{ totalElements }}</strong> SME{{ totalElements !== 1 ? 's' : '' }} found
-      </span>
-      <div class="page-size-control">
-        <label for="pageSize">Show:</label>
-        <select
-          id="pageSize"
-          [(ngModel)]="pageSize"
-          (change)="onPageSizeChange()"
-          class="page-size-select"
-        >
-          <option [value]="10">10</option>
-          <option [value]="20">20</option>
-          <option [value]="50">50</option>
-        </select>
-        <span>per page</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Loading SMEs...</p>
   </div>
 
-  <!-- Error State -->
-  <div *ngIf="error && !loading" class="error-container">
-    <div class="error-icon">⚠️</div>
-    <p>{{ error }}</p>
-    <button class="btn-retry" (click)="loadSmes()">Retry</button>
+  <!-- Loading -->
+  <div *ngIf="loading()" class="text-center my-4">
+    <div class="spinner-border text-primary"></div>
   </div>
 
-  <!-- SME Table -->
-  <div *ngIf="!loading && !error" class="table-container">
-    <table class="sme-table">
-      <thead>
-        <tr>
-          <th>SME ID</th>
-          <th>Username</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Mobile</th>
-          <th>User ID</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let sme of smes">
-          <td class="cell-id">{{ sme.smeId }}</td>
-          <td>{{ sme.username }}</td>
-          <td class="cell-name">{{ sme.fname }} {{ sme.lname }}</td>
-          <td>{{ sme.email }}</td>
-          <td>{{ sme.mobileNumber }}</td>
-          <td>{{ sme.userId }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Error -->
+  <div *ngIf="errorMessage()" class="alert alert-danger">
+    {{ errorMessage() }}
+  </div>
 
-    <!-- Empty State -->
-    <div *ngIf="smes.length === 0" class="empty-state">
-      <div class="empty-icon">📋</div>
-      <p>No SMEs found</p>
-      <small>Try adjusting your filters</small>
-    </div>
+  <!-- Table -->
+  <table *ngIf="!loading() && smes().length"
+         class="table table-bordered table-hover shadow-sm">
+
+    <thead class="table-light">
+      <tr>
+        <th>SME ID</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Email</th>
+        <th>User ID</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let sme of smes()">
+        <td>{{ sme.smeId }}</td>
+        <td>{{ sme.fname }} {{ sme.lname }}</td>
+        <td>{{ sme.mobileNumber }}</td>
+        <td>{{ sme.userEmail }}</td>
+        <td>{{ sme.userId }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Empty -->
+  <div *ngIf="!loading() && smes().length === 0"
+       class="alert alert-info">
+    No SMEs found.
   </div>
 
   <!-- Pagination -->
-  <div *ngIf="!loading && !error && totalPages > 0" class="pagination-container">
-    <div class="pagination-info">
-      Showing {{ currentPage * pageSize + 1 }}
-      to {{ Math.min((currentPage + 1) * pageSize, totalElements) }}
-      of {{ totalElements }}
-    </div>
+  <div class="d-flex justify-content-between mt-3"
+       *ngIf="totalPages() > 1">
+    <button class="btn btn-outline-secondary"
+            (click)="prev()"
+            [disabled]="page() === 0">
+      Previous
+    </button>
 
-    <div class="pagination-controls">
-      <button
-        class="btn-page"
-        (click)="previousPage()"
-        [disabled]="currentPage === 0"
-      >
-        ← Previous
-      </button>
+    <span class="align-self-center">
+      Page {{ page() + 1 }} of {{ totalPages() }}
+    </span>
 
-      <div class="page-numbers">
-        <button
-          *ngFor="let page of pageNumbers"
-          class="btn-page-number"
-          [class.active]="page === currentPage"
-          (click)="goToPage(page)"
-        >
-          {{ page + 1 }}
-        </button>
-      </div>
-
-      <button
-        class="btn-page"
-        (click)="nextPage()"
-        [disabled]="currentPage === totalPages - 1"
-      >
-        Next →
-      </button>
-    </div>
+    <button class="btn btn-outline-secondary"
+            (click)="next()"
+            [disabled]="page() + 1 >= totalPages()">
+      Next
+    </button>
   </div>
 </div>
