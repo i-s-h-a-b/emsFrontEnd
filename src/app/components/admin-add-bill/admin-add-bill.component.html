@@ -1,40 +1,48 @@
 <div class="page">
   <h2>Add Bill (Admin)</h2>
 
-  <div class="error" *ngIf="error">{{ error }}</div>
-  <div class="success" *ngIf="message">{{ message }}</div>
+  <div class="error" *ngIf="error()">{{ error() }}</div>
+  <div class="success" *ngIf="message()">{{ message() }}</div>
 
   <form [formGroup]="billForm" class="card">
 
-    <label>Consumer No</label>
-    <input formControlName="consumerNo">
+    <label>Customer ID *</label>
+    <input type="number" formControlName="customerId" placeholder="Enter customer ID">
+    <div class="error" *ngIf="billForm.get('customerId')?.invalid && billForm.get('customerId')?.touched">
+      Customer ID is required
+    </div>
 
-    <label>Billing Period</label>
-    <input placeholder="e.g. June 2024" formControlName="billingPeriod">
+    <label>Billing Period * (YYYY-MM)</label>
+    <input placeholder="e.g. 2025-01" formControlName="billingPeriod">
+    <div class="error" *ngIf="billForm.get('billingPeriod')?.invalid && billForm.get('billingPeriod')?.touched">
+      Billing period is required (format: YYYY-MM)
+    </div>
 
-    <label>Bill Date</label>
+    <label>Bill Date *</label>
     <input type="date" formControlName="billDate">
 
-    <label>Due Date</label>
+    <label>Due Date *</label>
     <input type="date" formControlName="dueDate">
 
-    <label>Disconnection Date</label>
+    <label>Disconnection Date (Optional)</label>
     <input type="date" formControlName="disconnectionDate">
 
-    <label>Bill Amount</label>
-    <input type="number" formControlName="billAmount">
+    <label>Bill Amount *</label>
+    <input type="number" step="0.01" formControlName="billAmount" placeholder="0.00">
 
     <label>Late Fee (Optional)</label>
-    <input type="number" formControlName="lateFee">
+    <input type="number" step="0.01" formControlName="lateFee" placeholder="0.00">
 
-    <label>Status</label>
+    <label>Status *</label>
     <select formControlName="status">
-      <option>Unpaid</option>
-      <option>Paid</option>
+      <option value="UNPAID">Unpaid</option>
+      <option value="PAID">Paid</option>
+      <option value="OVERDUE">Overdue</option>
+      <option value="PARTIALLY_PAID">Partially Paid</option>
     </select>
 
-    <button type="button" class="primary-btn" (click)="saveBill()">
-      Save Bill
+    <button type="button" class="primary-btn" (click)="saveBill()" [disabled]="isLoading()">
+      {{ isLoading() ? 'Saving...' : 'Save Bill' }}
     </button>
 
     <button type="button">Bulk Upload Bills</button>
@@ -43,12 +51,14 @@
   </form>
 
   <!-- Confirmation -->
-  <div class="card" *ngIf="savedBill">
-    <h3>Bill Added</h3>
-    <p><b>Bill ID:</b> {{ savedBill.billId }}</p>
-    <p><b>Consumer No:</b> {{ savedBill.consumerNo }}</p>
-    <p><b>Billing Period:</b> {{ savedBill.billingPeriod }}</p>
-    <p><b>Amount:</b> ₹{{ savedBill.billAmount }}</p>
+  <div class="card" *ngIf="savedBill()">
+    <h3>✅ Bill Added Successfully</h3>
+    <p><b>Bill ID:</b> {{ savedBill()?.billId }}</p>
+    <p><b>Customer ID:</b> {{ savedBill()?.customerId }}</p>
+    <p><b>Billing Period:</b> {{ savedBill()?.billingPeriod }}</p>
+    <p><b>Bill Amount:</b> ₹{{ savedBill()?.billAmount }}</p>
+    <p><b>Due Amount:</b> ₹{{ savedBill()?.dueAmount }}</p>
+    <p><b>Status:</b> {{ savedBill()?.paymentStatus }}</p>
 
     <button>Add Another Bill</button>
     <button>Return to Dashboard</button>

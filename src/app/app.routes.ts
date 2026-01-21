@@ -94,7 +94,7 @@ export const routes: Routes = [
     { path: 'admin/view-bill', component: AdminViewBillComponent },
     { path: 'admin/list-customer', component: CustomerListComponent },
 
-  // { path: 'admin/add-bill', component: AdminAddBillComponent },
+  { path: 'admin/add-bill', component: AdminAddBillComponent },
   //   { path: 'admin/view-bill', component: AdminViewBillComponent }
 
   // SME routes: localhost:4200/sme/...
